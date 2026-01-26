@@ -3,90 +3,115 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Minhas Viagens</title>
+<title>Planejador de Viagens</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+*{box-sizing:border-box}
 body{
-    font-family: Arial, sans-serif;
-    background:#eef2f7;
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background:linear-gradient(135deg,#1e3a8a,#2563eb);
     display:flex;
     justify-content:center;
     padding:20px;
+    color:#1e293b;
 }
 
 .container{
-    background:white;
+    background:#ffffff;
     width:100%;
-    max-width:500px;
-    padding:15px;
-    border-radius:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    max-width:520px;
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
 }
 
 h1{
     text-align:center;
-    font-size:20px;
-    margin-bottom:10px;
+    font-size:22px;
+    margin-bottom:15px;
+    color:#1e3a8a;
 }
 
-input, select, button{
+input, select{
     width:100%;
-    padding:6px;
-    margin:4px 0;
-    border-radius:6px;
-    border:1px solid #ccc;
+    padding:8px;
+    margin:5px 0;
+    border-radius:8px;
+    border:1px solid #cbd5e1;
     font-size:13px;
 }
 
 button{
-    background:#2563eb;
-    color:white;
-    font-weight:bold;
+    width:100%;
+    padding:8px;
+    margin-top:6px;
     border:none;
+    border-radius:10px;
+    font-weight:bold;
     cursor:pointer;
+    transition:.2s;
+    font-size:13px;
 }
 
-button:hover{ background:#1d4ed8; }
+.primary{background:#2563eb;color:white}
+.primary:hover{background:#1d4ed8}
 
-.danger{ background:#dc2626; }
-.danger:hover{ background:#b91c1c; }
+.danger{background:#ef4444;color:white}
+.danger:hover{background:#dc2626}
 
 .viagem{
-    background:#f8fafc;
-    margin-top:10px;
-    padding:8px;
-    border-radius:8px;
-    font-size:13px;
+    background:#f1f5f9;
+    margin-top:12px;
+    padding:10px;
+    border-radius:14px;
+    box-shadow:0 5px 10px rgba(0,0,0,0.05);
+}
+
+.viagem strong{
+    font-size:15px;
+    color:#0f172a;
 }
 
 .gasto-item{
     display:flex;
     justify-content:space-between;
     align-items:center;
+    margin:4px 0;
     font-size:12px;
-    margin:2px 0;
+}
+
+.gasto-item input{
+    transform:scale(1.1);
+    margin-right:6px;
+}
+
+.pago{
+    text-decoration:line-through;
+    color:#16a34a;
 }
 
 .resumo{
-    background:#e0f2fe;
-    padding:6px;
-    border-radius:6px;
-    font-size:12px;
     margin-top:6px;
+    background:white;
+    padding:6px;
+    border-radius:8px;
+    font-size:12px;
+    border-left:4px solid #2563eb;
 }
 
 canvas{
-    margin-top:10px;
+    margin-top:15px;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>✈️ Planejador de Viagens</h1>
+    <h1>✈️ Minhas Viagens</h1>
 
-    <input type="text" id="destino" placeholder="Destino">
+    <input type="text" id="destino" placeholder="Destino da viagem">
 
     <select id="categoria">
         <option>Passagem</option>
@@ -98,12 +123,11 @@ canvas{
     </select>
 
     <input type="number" id="valor" placeholder="Valor R$">
-    
-    <button onclick="adicionarGasto()">Adicionar gasto</button>
+
+    <button class="primary" onclick="adicionarGasto()">Adicionar Gasto</button>
     <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
     <div id="viagens"></div>
-
     <canvas id="grafico"></canvas>
 </div>
 
@@ -119,8 +143,7 @@ function adicionarGasto(){
     const destino = destinoInput.value;
     const categoria = categoriaInput.value;
     const valor = parseFloat(valorInput.value);
-
-    if(!destino || !valor) return alert("Preencha tudo!");
+    if(!destino || !valor) return alert("Preencha os campos!");
 
     let viagem = viagens.find(v => v.destino === destino);
     if(!viagem){
@@ -147,7 +170,7 @@ function excluirViagem(index){
 
 function limparTudo(){
     if(confirm("Apagar todas as viagens?")){
-        viagens = [];
+        viagens=[];
         salvar();
         renderizar();
     }
@@ -159,7 +182,6 @@ function renderizar(){
 
     viagens.forEach((v,vIndex)=>{
         let total=0, pago=0;
-
         let div=document.createElement("div");
         div.className="viagem";
 
@@ -168,11 +190,10 @@ function renderizar(){
         v.gastos.forEach((g,gIndex)=>{
             total+=g.valor;
             if(g.pago) pago+=g.valor;
-
             categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
 
             html+=`
-            <div class="gasto-item">
+            <div class="gasto-item ${g.pago?"pago":""}">
                 <span>
                     <input type="checkbox" ${g.pago?"checked":""}
                     onclick="togglePago(${vIndex},${gIndex})">
@@ -181,16 +202,16 @@ function renderizar(){
             </div>`;
         });
 
-        let falta = total - pago;
+        let falta=total-pago;
 
         html+=`
         <div class="resumo">
             Total: <b>R$${total.toFixed(2)}</b><br>
-            Pago: <b style="color:green">R$${pago.toFixed(2)}</b><br>
-            Falta: <b style="color:red">R$${falta.toFixed(2)}</b>
+            Pago: <b style="color:#16a34a">R$${pago.toFixed(2)}</b><br>
+            Falta: <b style="color:#dc2626">R$${falta.toFixed(2)}</b>
         </div>
 
-        <button class="danger" onclick="excluirViagem(${vIndex})">Excluir viagem</button>
+        <button class="danger" onclick="excluirViagem(${vIndex})">Excluir Viagem</button>
         `;
 
         div.innerHTML=html;
@@ -202,7 +223,6 @@ function renderizar(){
 
 function atualizarGrafico(dados){
     const ctx=document.getElementById('grafico');
-
     if(chart) chart.destroy();
 
     chart=new Chart(ctx,{
@@ -210,6 +230,9 @@ function atualizarGrafico(dados){
         data:{
             labels:Object.keys(dados),
             datasets:[{ data:Object.values(dados) }]
+        },
+        options:{
+            plugins:{ legend:{ position:'bottom' } }
         }
     });
 }
@@ -221,6 +244,5 @@ const viagensDiv=document.getElementById("viagens");
 
 renderizar();
 </script>
-
 </body>
 </html>
