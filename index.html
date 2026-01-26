@@ -135,6 +135,9 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <div class="container">
 <h1>❄️ Viagem para Gramado</h1>
 
+<!-- BOTÃO MÚSICA -->
+<button class="primary" onclick="toggleMusica()" id="musicBtn">🔊 Música ON</button>
+
 <select id="categoria">
 <option>Passagem</option>
 <option>Hotel</option>
@@ -156,10 +159,8 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
 <div id="viagens"></div>
-
 <div class="extra-box" id="countdownBox">⏳ Carregando contagem...</div>
 <canvas id="grafico"></canvas>
-
 <div class="extra-box" id="climaBox">🌡️ Carregando clima...</div>
 
 <div class="extra-box">
@@ -170,7 +171,29 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <div class="credito">Criado por <strong>Matheus Damica</strong> ✨</div>
 </div>
 
+<!-- 🎵 ÁUDIO -->
+<audio id="musicaFundo" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_0c4c4e6c9b.mp3?filename=christmas-piano-ambient-126197.mp3" type="audio/mpeg">
+</audio>
+
 <script>
+const musica=document.getElementById("musicaFundo");
+const musicBtn=document.getElementById("musicBtn");
+let tocando=false;
+
+function toggleMusica(){
+  if(!tocando){
+    musica.volume=0.4;
+    musica.play();
+    musicBtn.innerHTML="🔇 Música OFF";
+    tocando=true;
+  }else{
+    musica.pause();
+    musicBtn.innerHTML="🔊 Música ON";
+    tocando=false;
+  }
+}
+
 let viagens = JSON.parse(localStorage.getItem("viagens")) || [{ destino:"Gramado", gastos:[] }];
 let chart;
 
@@ -183,28 +206,13 @@ function adicionarGasto(){
   const pagamentoTipo = pagamentoSel.value;
   if(!nome || !valor) return alert("Preencha tudo!");
   viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
-  salvar();
-  renderizar();
-  nomeItem.value="";
-  valorInput.value="";
-}
-
-function togglePago(i){
-  viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago;
   salvar(); renderizar();
+  nomeItem.value=""; valorInput.value="";
 }
 
-function toggleCategoria(id){
-  const el=document.getElementById(id);
-  el.style.display=el.style.display==="none"?"block":"none";
-}
-
-function limparTudo(){
-  if(confirm("Apagar todos os gastos?")){
-    viagens[0].gastos=[];
-    salvar(); renderizar();
-  }
-}
+function togglePago(i){ viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago; salvar(); renderizar(); }
+function toggleCategoria(id){ const el=document.getElementById(id); el.style.display=el.style.display==="none"?"block":"none"; }
+function limparTudo(){ if(confirm("Apagar todos os gastos?")){ viagens[0].gastos=[]; salvar(); renderizar(); } }
 
 function renderizar(){
   viagensDiv.innerHTML="";
@@ -223,32 +231,15 @@ function renderizar(){
   for(const cat in grupos){
     const id=`cat-${cat}`;
     const totalCat=grupos[cat].reduce((s,o)=>s+o.g.valor,0);
-    html+=`
-    <div class="categoria-header" onclick="toggleCategoria('${id}')">
-      <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span>
-    </div>
-    <div class="gastos-lista" id="${id}">`;
+    html+=`<div class="categoria-header" onclick="toggleCategoria('${id}')"><span>${cat}</span><span>R$${totalCat.toFixed(2)}</span></div><div class="gastos-lista" id="${id}">`;
     grupos[cat].forEach(obj=>{
-      html+=`
-      <div class="gasto ${obj.g.pago?"pago":""}">
-        <span><input type="checkbox" ${obj.g.pago?"checked":""} onclick="togglePago(${obj.i})">
-        ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})</span>
-        <span>R$${obj.g.valor.toFixed(2)}</span>
-      </div>`;
+      html+=`<div class="gasto ${obj.g.pago?"pago":""}"><span><input type="checkbox" ${obj.g.pago?"checked":""} onclick="togglePago(${obj.i})"> ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})</span><span>R$${obj.g.valor.toFixed(2)}</span></div>`;
     });
     html+=`</div>`;
   }
 
   let falta=total-pago;
-  html+=`
-  <div class="resumo">
-  Total: R$${total.toFixed(2)}<br>
-  Pago: R$${pago.toFixed(2)}<br>
-  Falta: R$${falta.toFixed(2)}<br>
-  💳 Cartão: R$${cartao.toFixed(2)}<br>
-  💵 Dinheiro: R$${dinheiro.toFixed(2)}
-  </div></div>`;
-
+  html+=`<div class="resumo">Total: R$${total.toFixed(2)}<br>Pago: R$${pago.toFixed(2)}<br>Falta: R$${falta.toFixed(2)}<br>💳 Cartão: R$${cartao.toFixed(2)}<br>💵 Dinheiro: R$${dinheiro.toFixed(2)}</div></div>`;
   viagensDiv.innerHTML=html;
   atualizarGrafico(categoriasTotais);
 }
