@@ -1,245 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Planejador de Viagens</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Minhas Viagens</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e3a8a);
-    margin: 0;
-    padding: 20px;
-    color: white;
+body{
+    font-family: Arial, sans-serif;
+    background:#eef2f7;
+    display:flex;
+    justify-content:center;
+    padding:20px;
 }
 
-h1 { text-align: center; }
-
-.container {
-    max-width: 1000px;
-    margin: auto;
-    background: white;
-    color: black;
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+.container{
+    background:white;
+    width:100%;
+    max-width:500px;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-input {
-    padding: 8px;
-    width: 100%;
-    margin: 5px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+h1{
+    text-align:center;
+    font-size:20px;
+    margin-bottom:10px;
 }
 
-button {
-    padding: 10px;
-    width: 100%;
-    background: #2563eb;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 5px;
+input, select, button{
+    width:100%;
+    padding:6px;
+    margin:4px 0;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-size:13px;
 }
 
-button:hover { background: #1e40af; }
-
-.delete-btn {
-    background: #dc2626;
-    padding: 6px 10px;
-    border-radius: 6px;
-    color: white;
-    border: none;
-    cursor: pointer;
+button{
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+    border:none;
+    cursor:pointer;
 }
 
-.clear-btn {
-    background: #111827;
+button:hover{ background:#1d4ed8; }
+
+.danger{ background:#dc2626; }
+.danger:hover{ background:#b91c1c; }
+
+.viagem{
+    background:#f8fafc;
+    margin-top:10px;
+    padding:8px;
+    border-radius:8px;
+    font-size:13px;
 }
 
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
+.gasto-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    margin:2px 0;
 }
 
-th, td {
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
+.resumo{
+    background:#e0f2fe;
+    padding:6px;
+    border-radius:6px;
+    font-size:12px;
+    margin-top:6px;
 }
 
-.total {
-    font-size: 18px;
-    margin-top: 10px;
-    font-weight: bold;
+canvas{
+    margin-top:10px;
 }
 </style>
 </head>
 <body>
 
-<h1>🌍 Planejamento de Viagens do Matheus</h1>
-
 <div class="container">
+    <h1>✈️ Planejador de Viagens</h1>
 
-<h2>Nova Viagem</h2>
-<input type="text" id="local" placeholder="Destino">
-<input type="number" id="passagem" placeholder="Valor Passagem">
-<input type="number" id="hotel" placeholder="Valor Hotel">
-<input type="number" id="alimentacao" placeholder="Valor Alimentação">
-<input type="number" id="passeios" placeholder="Valor Passeios">
-<input type="number" id="transporte" placeholder="Valor Transporte Local">
+    <input type="text" id="destino" placeholder="Destino">
 
-<button onclick="adicionarViagem()">Salvar Viagem</button>
-<button class="clear-btn" onclick="limparTudo()">🧹 Limpar Tudo</button>
+    <select id="categoria">
+        <option>Passagem</option>
+        <option>Hotel</option>
+        <option>Alimentação</option>
+        <option>Passeios</option>
+        <option>Transporte</option>
+        <option>Outros</option>
+    </select>
 
-<table>
-<thead>
-<tr>
-<th>Destino</th>
-<th>Total</th>
-<th>Checklist</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="tabela"></tbody>
-</table>
+    <input type="number" id="valor" placeholder="Valor R$">
+    
+    <button onclick="adicionarGasto()">Adicionar gasto</button>
+    <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
-<div class="total" id="totalGeral"></div>
+    <div id="viagens"></div>
 
-<canvas id="grafico"></canvas>
-
+    <canvas id="grafico"></canvas>
 </div>
 
 <script>
 let viagens = JSON.parse(localStorage.getItem("viagens")) || [];
-let editandoIndex = null;
+let chart;
 
-function salvar() {
+function salvar(){
     localStorage.setItem("viagens", JSON.stringify(viagens));
 }
 
-function adicionarViagem() {
-    const viagem = {
-        local: local.value,
-        passagem: +passagem.value || 0,
-        hotel: +hotel.value || 0,
-        alimentacao: +alimentacao.value || 0,
-        passeios: +passeios.value || 0,
-        transporte: +transporte.value || 0,
-        pago: { passagem:false, hotel:false, alimentacao:false, passeios:false, transporte:false }
-    };
+function adicionarGasto(){
+    const destino = destinoInput.value;
+    const categoria = categoriaInput.value;
+    const valor = parseFloat(valorInput.value);
 
-    viagem.total = viagem.passagem + viagem.hotel + viagem.alimentacao + viagem.passeios + viagem.transporte;
+    if(!destino || !valor) return alert("Preencha tudo!");
 
-    if (editandoIndex !== null) {
-        viagem.pago = viagens[editandoIndex].pago;
-        viagens[editandoIndex] = viagem;
-        editandoIndex = null;
-    } else {
+    let viagem = viagens.find(v => v.destino === destino);
+    if(!viagem){
+        viagem = { destino, gastos: [] };
         viagens.push(viagem);
     }
 
+    viagem.gastos.push({ categoria, valor, pago:false });
     salvar();
-    atualizarTela();
-    document.querySelectorAll("input").forEach(i=>i.value="");
+    renderizar();
 }
 
-function editarViagem(i) {
-    const v = viagens[i];
-    local.value = v.local;
-    passagem.value = v.passagem;
-    hotel.value = v.hotel;
-    alimentacao.value = v.alimentacao;
-    passeios.value = v.passeios;
-    transporte.value = v.transporte;
-
-    editandoIndex = i;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function excluirViagem(i) {
-    viagens.splice(i,1);
+function togglePago(vIndex, gIndex){
+    viagens[vIndex].gastos[gIndex].pago = !viagens[vIndex].gastos[gIndex].pago;
     salvar();
-    atualizarTela();
+    renderizar();
 }
 
-function limparTudo() {
-    if(confirm("Tem certeza que deseja apagar TODAS as viagens?")) {
+function excluirViagem(index){
+    viagens.splice(index,1);
+    salvar();
+    renderizar();
+}
+
+function limparTudo(){
+    if(confirm("Apagar todas as viagens?")){
         viagens = [];
         salvar();
-        atualizarTela();
+        renderizar();
     }
 }
 
-function togglePago(i, tipo) {
-    viagens[i].pago[tipo] = !viagens[i].pago[tipo];
-    salvar();
-}
+function renderizar(){
+    viagensDiv.innerHTML="";
+    let categoriasTotais={};
 
-function atualizarTela() {
-    const tbody = document.getElementById("tabela");
-    tbody.innerHTML = "";
-    let totalGeral = 0;
+    viagens.forEach((v,vIndex)=>{
+        let total=0, pago=0;
 
-    viagens.forEach((v,i)=>{
-        totalGeral += v.total;
+        let div=document.createElement("div");
+        div.className="viagem";
 
-        const checklist = `
-        ✈️ <input type="checkbox" ${v.pago.passagem?"checked":""} onclick="togglePago(${i},'passagem')">
-        🏨 <input type="checkbox" ${v.pago.hotel?"checked":""} onclick="togglePago(${i},'hotel')">
-        🍔 <input type="checkbox" ${v.pago.alimentacao?"checked":""} onclick="togglePago(${i},'alimentacao')">
-        🎟 <input type="checkbox" ${v.pago.passeios?"checked":""} onclick="togglePago(${i},'passeios')">
-        🚕 <input type="checkbox" ${v.pago.transporte?"checked":""} onclick="togglePago(${i},'transporte')">
+        let html=`<strong>${v.destino}</strong>`;
+
+        v.gastos.forEach((g,gIndex)=>{
+            total+=g.valor;
+            if(g.pago) pago+=g.valor;
+
+            categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
+
+            html+=`
+            <div class="gasto-item">
+                <span>
+                    <input type="checkbox" ${g.pago?"checked":""}
+                    onclick="togglePago(${vIndex},${gIndex})">
+                    ${g.categoria} - R$${g.valor.toFixed(2)}
+                </span>
+            </div>`;
+        });
+
+        let falta = total - pago;
+
+        html+=`
+        <div class="resumo">
+            Total: <b>R$${total.toFixed(2)}</b><br>
+            Pago: <b style="color:green">R$${pago.toFixed(2)}</b><br>
+            Falta: <b style="color:red">R$${falta.toFixed(2)}</b>
+        </div>
+
+        <button class="danger" onclick="excluirViagem(${vIndex})">Excluir viagem</button>
         `;
 
-        tbody.innerHTML += `
-        <tr>
-            <td>${v.local}</td>
-            <td>R$ ${v.total.toFixed(2)}</td>
-            <td>${checklist}</td>
-            <td>
-                <button onclick="editarViagem(${i})">✏️</button>
-                <button class="delete-btn" onclick="excluirViagem(${i})">X</button>
-            </td>
-        </tr>`;
+        div.innerHTML=html;
+        viagensDiv.appendChild(div);
     });
 
-    document.getElementById("totalGeral").innerText = "Total Geral Planejado: R$ " + totalGeral.toFixed(2);
-    atualizarGrafico();
+    atualizarGrafico(categoriasTotais);
 }
 
-let grafico;
+function atualizarGrafico(dados){
+    const ctx=document.getElementById('grafico');
 
-function atualizarGrafico() {
-    const ctx = document.getElementById('grafico').getContext('2d');
+    if(chart) chart.destroy();
 
-    let soma = {passagem:0, hotel:0, alimentacao:0, passeios:0, transporte:0};
-
-    viagens.forEach(v=>{
-        soma.passagem += v.passagem;
-        soma.hotel += v.hotel;
-        soma.alimentacao += v.alimentacao;
-        soma.passeios += v.passeios;
-        soma.transporte += v.transporte;
-    });
-
-    if(grafico) grafico.destroy();
-
-    grafico = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Passagem','Hotel','Alimentação','Passeios','Transporte'],
-            datasets: [{ data: Object.values(soma) }]
+    chart=new Chart(ctx,{
+        type:'doughnut',
+        data:{
+            labels:Object.keys(dados),
+            datasets:[{ data:Object.values(dados) }]
         }
     });
 }
 
-atualizarTela();
+const destinoInput=document.getElementById("destino");
+const categoriaInput=document.getElementById("categoria");
+const valorInput=document.getElementById("valor");
+const viagensDiv=document.getElementById("viagens");
+
+renderizar();
 </script>
 
 </body>
