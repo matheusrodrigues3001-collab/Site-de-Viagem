@@ -3,172 +3,310 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Planejador de Viagem – Gramado ❄️</title>
+<title>Viagem para Gramado</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(#e6f2ff, #ffffff);
-    overflow-x: hidden;
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background:linear-gradient(180deg,#dbeafe,#bfdbfe,#e0f2fe);
+    display:flex;
+    justify-content:center;
+    padding:25px;
+    overflow-x:hidden;
 }
 
-/* NEVE */
-.snowflake {
-    position: fixed;
-    top: -10px;
-    color: white;
-    font-size: 10px;
-    animation: fall linear infinite;
+/* ❄️ NEVE */
+.snowflake{
+    position:fixed;
+    top:-10px;
+    color:white;
+    font-size:10px;
+    animation:fall linear infinite;
+    opacity:0.9;
 }
-@keyframes fall {
-    to { transform: translateY(100vh); }
+@keyframes fall{to{transform:translateY(110vh)}}
+
+.container{
+    backdrop-filter: blur(14px);
+    background:rgba(255,255,255,0.75);
+    width:100%;
+    max-width:600px;
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 25px 50px rgba(0,0,0,0.15);
+    border:1px solid rgba(255,255,255,0.6);
 }
 
-/* CARD PRINCIPAL */
-.container {
-    max-width: 900px;
-    margin: 40px auto;
-    background: rgba(255,255,255,0.95);
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+h1{text-align:center;color:#1e3a8a;margin-bottom:10px}
+
+input,select{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    border-radius:12px;
+    border:1px solid #c7d2fe;
+    font-size:13px;
+    background:white;
 }
 
-h1 {
-    text-align: center;
-    color: #1e3a5f;
+button{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    border:none;
+    border-radius:12px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-label {
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
+.primary{background:#3b82f6;color:white}
+.danger{background:#64748b;color:white}
+
+.viagem{
+    background:white;
+    margin-top:15px;
+    padding:14px;
+    border-radius:16px;
+    border:1px solid #dbeafe;
 }
 
-input, select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-top: 4px;
+.categoria-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:linear-gradient(90deg,#60a5fa,#3b82f6);
+    color:white;
+    padding:7px 10px;
+    border-radius:10px;
+    margin-top:8px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:bold;
 }
 
-button {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
+.gastos-lista{
+    display:none;
+    margin-top:6px;
+    padding:6px;
+    background:#f0f9ff;
+    border-radius:10px;
 }
 
-.add-btn { background: #1e3a5f; color: white; }
-.clear-btn { background: #ccc; }
-
-#countdown {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f0f8ff;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: #0f172a;
+.gasto{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    margin:6px 0;
+    padding:4px 0;
+    border-bottom:1px dashed #cfe8ff;
 }
 
-iframe {
-    width: 100%;
-    height: 250px;
-    border-radius: 12px;
-    margin-top: 15px;
-    border: none;
+.pago{text-decoration:line-through;color:#16a34a;font-weight:bold}
+
+.resumo{
+    margin-top:10px;
+    background:#f0f9ff;
+    padding:10px;
+    border-radius:10px;
+    font-size:12px;
+    border:1px solid #bae6fd;
+    line-height:1.6;
 }
+
+.extra-box{
+    margin-top:12px;
+    background:white;
+    border-radius:14px;
+    padding:10px;
+    border:1px solid #dbeafe;
+    font-size:13px;
+}
+
+iframe{width:100%;border-radius:12px;margin-top:6px}
+
+canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 </style>
 </head>
-
 <body>
 
-<!-- NEVE SCRIPT -->
-<script>
-for (let i = 0; i < 50; i++) {
-    let snow = document.createElement("div");
-    snow.className = "snowflake";
-    snow.innerHTML = "❄";
-    snow.style.left = Math.random() * 100 + "vw";
-    snow.style.animationDuration = (Math.random() * 5 + 5) + "s";
-    snow.style.opacity = Math.random();
-    snow.style.fontSize = Math.random() * 10 + 10 + "px";
-    document.body.appendChild(snow);
-}
-</script>
-
 <div class="container">
-    <h1>❄️ Planejamento de Viagem para Gramado</h1>
+<h1>❄️ Viagem para Gramado</h1>
 
-    <label>Seu nome</label>
-    <input type="text" id="nome">
+<select id="categoria">
+<option>Passagem</option>
+<option>Hotel</option>
+<option>Alimentação</option>
+<option>Passeios</option>
+<option>Transporte</option>
+<option>Outros</option>
+</select>
 
-    <label>Data da viagem</label>
-    <input type="date" id="dataViagem">
+<input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
+<input type="number" id="valor" placeholder="Valor R$">
 
-    <label>Forma de pagamento</label>
-    <select id="pagamento">
-        <option>Cartão</option>
-        <option>Dinheiro</option>
-    </select>
+<select id="pagamento">
+<option value="cartao">💳 Cartão</option>
+<option value="dinheiro">💵 Dinheiro</option>
+</select>
 
-    <button class="add-btn" onclick="iniciarContagem()">Incluir</button>
-    <button class="clear-btn" onclick="limpar()">Limpar dados</button>
+<button class="primary" onclick="adicionarGasto()">Adicionar</button>
+<button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
-    <div id="countdown">Aguardando data da viagem...</div>
+<div id="viagens"></div>
+<canvas id="grafico"></canvas>
 
-    <h2>📍 Localização</h2>
-    <iframe src="https://maps.google.com/maps?q=gramado&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
+<div class="extra-box" id="climaBox">🌡️ Carregando clima...</div>
 
-    <h2>🌡️ Clima atual</h2>
-    <iframe src="https://wttr.in/Gramado?format=3"></iframe>
+<div class="extra-box">
+🗺️ Mapa de Gramado
+<iframe height="200"
+src="https://maps.google.com/maps?q=Gramado%20RS&t=&z=13&ie=UTF8&iwloc=&output=embed">
+</iframe>
+</div>
+
 </div>
 
 <script>
-let intervalo;
+let viagens = JSON.parse(localStorage.getItem("viagens")) || [{
+    destino:"Gramado",
+    gastos:[]
+}];
 
-function iniciarContagem() {
-    clearInterval(intervalo);
+let chart;
 
-    const dataInput = document.getElementById("dataViagem").value;
-    if (!dataInput) return;
+function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
 
-    const destino = new Date(dataInput + "T00:00:00").getTime();
+function adicionarGasto(){
+    const categoria=categoriaSel.value;
+    const nome=nomeItem.value.trim();
+    const valor=parseFloat(valorInput.value);
+    const pagamentoTipo=pagamentoSel.value;
 
-    intervalo = setInterval(() => {
-        const agora = new Date().getTime();
-        const distancia = destino - agora;
+    if(!nome||!valor) return alert("Preencha tudo!");
 
-        if (distancia <= 0) {
-            document.getElementById("countdown").innerHTML = "🎉 Sua viagem começou!";
-            clearInterval(intervalo);
-            return;
-        }
+    viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
+    salvar(); renderizar();
 
-        const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
-        const horas = Math.floor((distancia / (1000 * 60 * 60)) % 24);
-        const minutos = Math.floor((distancia / (1000 * 60)) % 60);
-        const segundos = Math.floor((distancia / 1000) % 60);
-
-        document.getElementById("countdown").innerHTML =
-            `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s para sua viagem ❄️`;
-    }, 1000);
+    // 🧹 limpa campos
+    nomeItem.value="";
+    valorInput.value="";
+    categoriaSel.selectedIndex=0;
+    pagamentoSel.selectedIndex=0;
+    nomeItem.focus();
 }
 
-function limpar() {
-    document.getElementById("nome").value = "";
-    document.getElementById("dataViagem").value = "";
-    document.getElementById("pagamento").selectedIndex = 0;
-    document.getElementById("countdown").innerHTML = "Dados limpos. Insira novas informações.";
-    clearInterval(intervalo);
+function togglePago(i){
+    viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago;
+    salvar(); renderizar();
 }
+
+function toggleCategoria(id){
+    const el=document.getElementById(id);
+    el.style.display=el.style.display==="none"?"block":"none";
+}
+
+function limparTudo(){
+    if(confirm("Apagar todos os gastos?")){
+        viagens[0].gastos=[]; salvar(); renderizar();
+    }
+}
+
+function renderizar(){
+    viagensDiv.innerHTML="";
+    let total=0,pago=0,cartao=0,dinheiro=0,categoriasTotais={};
+    const grupos={};
+
+    viagens[0].gastos.forEach((g,i)=>{
+        if(!grupos[g.categoria]) grupos[g.categoria]=[];
+        grupos[g.categoria].push({g,i});
+        total+=g.valor;
+        if(g.pago) pago+=g.valor;
+        if(g.pagamento==="cartao") cartao+=g.valor; else dinheiro+=g.valor;
+        categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
+    });
+
+    let html=`<div class="viagem"><strong>Gramado</strong>`;
+
+    for(const cat in grupos){
+        const id=`cat-${cat}`;
+        const totalCat=grupos[cat].reduce((s,o)=>s+o.g.valor,0);
+        html+=`
+        <div class="categoria-header" onclick="toggleCategoria('${id}')">
+            <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span>
+        </div>
+        <div class="gastos-lista" id="${id}">`;
+
+        grupos[cat].forEach(obj=>{
+            html+=`
+            <div class="gasto ${obj.g.pago?"pago":""}">
+                <span>
+                <input type="checkbox" ${obj.g.pago?"checked":""}
+                onclick="togglePago(${obj.i})">
+                ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})
+                </span>
+                <span>R$${obj.g.valor.toFixed(2)}</span>
+            </div>`;
+        });
+
+        html+=`</div>`;
+    }
+
+    let falta=total-pago;
+    let porcentagem=((pago/total)*100||0).toFixed(1);
+
+    html+=`
+    <div class="resumo">
+    Total: R$${total.toFixed(2)}<br>
+    Pago: R$${pago.toFixed(2)}<br>
+    Falta: R$${falta.toFixed(2)}<br>
+    💳 Cartão: R$${cartao.toFixed(2)}<br>
+    💵 Dinheiro: R$${dinheiro.toFixed(2)}<br>
+    ✔ ${porcentagem}% pago
+    </div></div>`;
+
+    viagensDiv.innerHTML=html;
+    atualizarGrafico(categoriasTotais);
+}
+
+function atualizarGrafico(dados){
+    const ctx=document.getElementById('grafico');
+    if(chart) chart.destroy();
+    chart=new Chart(ctx,{
+        type:'doughnut',
+        data:{labels:Object.keys(dados),datasets:[{data:Object.values(dados)}]}
+    });
+}
+
+/* 🌡️ CLIMA */
+fetch("https://api.open-meteo.com/v1/forecast?latitude=-29.37&longitude=-50.88&current_weather=true")
+.then(r=>r.json())
+.then(d=>{
+    climaBox.innerHTML=`🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h`;
+});
+
+/* ❄️ NEVE */
+setInterval(()=>{
+    const snow=document.createElement("div");
+    snow.className="snowflake";
+    snow.innerHTML="❄";
+    snow.style.left=Math.random()*window.innerWidth+"px";
+    snow.style.animationDuration=(Math.random()*3+2)+"s";
+    snow.style.fontSize=(Math.random()*10+10)+"px";
+    document.body.appendChild(snow);
+    setTimeout(()=>snow.remove(),5000);
+},200);
+
+const categoriaSel=document.getElementById("categoria");
+const nomeItem=document.getElementById("nomeItem");
+const valorInput=document.getElementById("valor");
+const pagamentoSel=document.getElementById("pagamento");
+const viagensDiv=document.getElementById("viagens");
+const climaBox=document.getElementById("climaBox");
+
+renderizar();
 </script>
-
 </body>
 </html>
