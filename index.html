@@ -43,9 +43,23 @@ button {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    margin-top: 5px;
 }
 
 button:hover { background: #1e40af; }
+
+.delete-btn {
+    background: #dc2626;
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.clear-btn {
+    background: #111827;
+}
 
 table {
     width: 100%;
@@ -81,6 +95,7 @@ th, td {
 <input type="number" id="transporte" placeholder="Valor Transporte Local">
 
 <button onclick="adicionarViagem()">Salvar Viagem</button>
+<button class="clear-btn" onclick="limparTudo()">🧹 Limpar Tudo</button>
 
 <table>
 <thead>
@@ -88,6 +103,7 @@ th, td {
 <th>Destino</th>
 <th>Total</th>
 <th>Checklist</th>
+<th>Excluir</th>
 </tr>
 </thead>
 <tbody id="tabela"></tbody>
@@ -114,25 +130,33 @@ function adicionarViagem() {
         alimentacao: +alimentacao.value || 0,
         passeios: +passeios.value || 0,
         transporte: +transporte.value || 0,
-        pago: {
-            passagem:false,
-            hotel:false,
-            alimentacao:false,
-            passeios:false,
-            transporte:false
-        }
+        pago: { passagem:false, hotel:false, alimentacao:false, passeios:false, transporte:false }
     };
 
     viagem.total = viagem.passagem + viagem.hotel + viagem.alimentacao + viagem.passeios + viagem.transporte;
     viagens.push(viagem);
     salvar();
     atualizarTela();
+    document.querySelectorAll("input").forEach(i=>i.value="");
+}
+
+function excluirViagem(i) {
+    viagens.splice(i,1);
+    salvar();
+    atualizarTela();
+}
+
+function limparTudo() {
+    if(confirm("Tem certeza que deseja apagar TODAS as viagens?")) {
+        viagens = [];
+        salvar();
+        atualizarTela();
+    }
 }
 
 function togglePago(i, tipo) {
     viagens[i].pago[tipo] = !viagens[i].pago[tipo];
     salvar();
-    atualizarTela();
 }
 
 function atualizarTela() {
@@ -156,6 +180,7 @@ function atualizarTela() {
             <td>${v.local}</td>
             <td>R$ ${v.total.toFixed(2)}</td>
             <td>${checklist}</td>
+            <td><button class="delete-btn" onclick="excluirViagem(${i})">X</button></td>
         </tr>`;
     });
 
@@ -184,9 +209,7 @@ function atualizarGrafico() {
         type: 'pie',
         data: {
             labels: ['Passagem','Hotel','Alimentação','Passeios','Transporte'],
-            datasets: [{
-                data: Object.values(soma)
-            }]
+            datasets: [{ data: Object.values(soma) }]
         }
     });
 }
