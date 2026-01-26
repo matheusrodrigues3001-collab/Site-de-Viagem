@@ -11,45 +11,45 @@
 body{
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background:linear-gradient(180deg,#1b1b1b,#2e1f1f,#3b2f2f);
+    background:linear-gradient(180deg,#dbeafe,#bfdbfe,#e0f2fe);
     display:flex;
     justify-content:center;
     padding:25px;
-    color:#2b2b2b;
     overflow-x:hidden;
 }
+
+/* ❄️ NEVE */
 .snowflake{
     position:fixed;
     top:-10px;
     color:white;
     font-size:10px;
     animation:fall linear infinite;
-    opacity:0.8;
+    opacity:0.9;
 }
-@keyframes fall{
-    to{transform:translateY(110vh)}
-}
+@keyframes fall{to{transform:translateY(110vh)}}
 
 .container{
-    background:#fffaf5;
+    backdrop-filter: blur(14px);
+    background:rgba(255,255,255,0.75);
     width:100%;
-    max-width:560px;
+    max-width:600px;
     border-radius:22px;
     padding:22px;
-    box-shadow:0 25px 60px rgba(0,0,0,0.45);
-    border:1px solid #e6d5c3;
+    box-shadow:0 25px 50px rgba(0,0,0,0.15);
+    border:1px solid rgba(255,255,255,0.6);
 }
 
-h1{text-align:center;color:#5c1a1a;font-size:24px;margin-bottom:8px}
+h1{text-align:center;color:#1e3a8a;margin-bottom:10px}
 
 input,select{
     width:100%;
     padding:10px;
     margin:6px 0;
-    border-radius:10px;
-    border:1px solid #d6c2b1;
+    border-radius:12px;
+    border:1px solid #c7d2fe;
     font-size:13px;
-    background:#fff;
+    background:white;
 }
 
 button{
@@ -62,22 +62,22 @@ button{
     cursor:pointer;
 }
 
-.primary{background:#7a1f1f;color:white}
-.danger{background:#444;color:white}
+.primary{background:#3b82f6;color:white}
+.danger{background:#64748b;color:white}
 
 .viagem{
-    background:#fff;
+    background:white;
     margin-top:15px;
     padding:14px;
     border-radius:16px;
-    border:1px solid #eaded3;
+    border:1px solid #dbeafe;
 }
 
 .categoria-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    background:linear-gradient(90deg,#5c1a1a,#7a1f1f);
+    background:linear-gradient(90deg,#60a5fa,#3b82f6);
     color:white;
     padding:7px 10px;
     border-radius:10px;
@@ -91,7 +91,7 @@ button{
     display:none;
     margin-top:6px;
     padding:6px;
-    background:#fffaf5;
+    background:#f0f9ff;
     border-radius:10px;
 }
 
@@ -101,22 +101,33 @@ button{
     font-size:12px;
     margin:6px 0;
     padding:4px 0;
-    border-bottom:1px dashed #e5d5c5;
+    border-bottom:1px dashed #cfe8ff;
 }
 
-.pago{text-decoration:line-through;color:#15803d;font-weight:bold}
+.pago{text-decoration:line-through;color:#16a34a;font-weight:bold}
 
 .resumo{
     margin-top:10px;
-    background:#fff;
+    background:#f0f9ff;
     padding:10px;
     border-radius:10px;
     font-size:12px;
-    border:1px solid #eaded3;
+    border:1px solid #bae6fd;
     line-height:1.6;
 }
 
-canvas{margin-top:18px;background:#fff;padding:8px;border-radius:12px}
+.extra-box{
+    margin-top:12px;
+    background:white;
+    border-radius:14px;
+    padding:10px;
+    border:1px solid #dbeafe;
+    font-size:13px;
+}
+
+iframe{width:100%;border-radius:12px;margin-top:6px}
+
+canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 </style>
 </head>
 <body>
@@ -146,6 +157,16 @@ canvas{margin-top:18px;background:#fff;padding:8px;border-radius:12px}
 
 <div id="viagens"></div>
 <canvas id="grafico"></canvas>
+
+<div class="extra-box" id="climaBox">🌡️ Carregando clima...</div>
+
+<div class="extra-box">
+🗺️ Mapa de Gramado
+<iframe height="200"
+src="https://maps.google.com/maps?q=Gramado%20RS&t=&z=13&ie=UTF8&iwloc=&output=embed">
+</iframe>
+</div>
+
 </div>
 
 <script>
@@ -159,22 +180,19 @@ let chart;
 function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
 
 function adicionarGasto(){
-    const categoria=categoria.value;
+    const categoria=categoriaSel.value;
     const nome=nomeItem.value.trim();
     const valor=parseFloat(valorInput.value);
-    const pagamentoTipo=pagamento.value;
-
+    const pagamentoTipo=pagamentoSel.value;
     if(!nome||!valor) return alert("Preencha tudo!");
 
     viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
-    salvar();
-    renderizar();
+    salvar(); renderizar();
 }
 
 function togglePago(i){
     viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago;
-    salvar();
-    renderizar();
+    salvar(); renderizar();
 }
 
 function toggleCategoria(id){
@@ -184,29 +202,25 @@ function toggleCategoria(id){
 
 function limparTudo(){
     if(confirm("Apagar todos os gastos?")){
-        viagens[0].gastos=[];
-        salvar();
-        renderizar();
+        viagens[0].gastos=[]; salvar(); renderizar();
     }
 }
 
 function renderizar(){
     viagensDiv.innerHTML="";
     let total=0,pago=0,cartao=0,dinheiro=0,categoriasTotais={};
-    let v=viagens[0];
     const grupos={};
 
-    v.gastos.forEach((g,i)=>{
+    viagens[0].gastos.forEach((g,i)=>{
         if(!grupos[g.categoria]) grupos[g.categoria]=[];
         grupos[g.categoria].push({g,i});
         total+=g.valor;
         if(g.pago) pago+=g.valor;
-        if(g.pagamento==="cartao") cartao+=g.valor;
-        else dinheiro+=g.valor;
+        if(g.pagamento==="cartao") cartao+=g.valor; else dinheiro+=g.valor;
         categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
     });
 
-    let html=`<div class="viagem"><strong>${v.destino}</strong>`;
+    let html=`<div class="viagem"><strong>Gramado</strong>`;
 
     for(const cat in grupos){
         const id=`cat-${cat}`;
@@ -221,9 +235,9 @@ function renderizar(){
             html+=`
             <div class="gasto ${obj.g.pago?"pago":""}">
                 <span>
-                    <input type="checkbox" ${obj.g.pago?"checked":""}
-                    onclick="togglePago(${obj.i})">
-                    ${obj.g.nome} (${obj.g.pagamento})
+                <input type="checkbox" ${obj.g.pago?"checked":""}
+                onclick="togglePago(${obj.i})">
+                ${obj.g.nome} (${obj.g.pagamento})
                 </span>
                 <span>R$${obj.g.valor.toFixed(2)}</span>
             </div>`;
@@ -242,7 +256,7 @@ function renderizar(){
     Falta: R$${falta.toFixed(2)}<br>
     💳 Cartão: R$${cartao.toFixed(2)}<br>
     💵 Dinheiro: R$${dinheiro.toFixed(2)}<br>
-    ✔ ${porcentagem}% da viagem paga
+    ✔ ${porcentagem}% pago
     </div></div>`;
 
     viagensDiv.innerHTML=html;
@@ -258,15 +272,14 @@ function atualizarGrafico(dados){
     });
 }
 
-const categoria=document.getElementById("categoria");
-const nomeItem=document.getElementById("nomeItem");
-const valorInput=document.getElementById("valor");
-const pagamento=document.getElementById("pagamento");
-const viagensDiv=document.getElementById("viagens");
+/* 🌡️ CLIMA GRAMADO */
+fetch("https://api.open-meteo.com/v1/forecast?latitude=-29.37&longitude=-50.88&current_weather=true")
+.then(r=>r.json())
+.then(d=>{
+    climaBox.innerHTML=`🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h`;
+});
 
-renderizar();
-
-/* ❄️ NEVE ANIMADA */
+/* ❄️ NEVE */
 setInterval(()=>{
     const snow=document.createElement("div");
     snow.className="snowflake";
@@ -277,7 +290,15 @@ setInterval(()=>{
     document.body.appendChild(snow);
     setTimeout(()=>snow.remove(),5000);
 },200);
+
+const categoriaSel=document.getElementById("categoria");
+const nomeItem=document.getElementById("nomeItem");
+const valorInput=document.getElementById("valor");
+const pagamentoSel=document.getElementById("pagamento");
+const viagensDiv=document.getElementById("viagens");
+const climaBox=document.getElementById("climaBox");
+
+renderizar();
 </script>
 </body>
 </html>
-
