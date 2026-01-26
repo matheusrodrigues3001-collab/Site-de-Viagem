@@ -11,110 +11,141 @@
 body{
     margin:0;
     font-family:'Segoe UI', sans-serif;
-    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    background:linear-gradient(180deg,#1b1b1b,#2e1f1f,#3b2f2f);
     display:flex;
     justify-content:center;
-    padding:20px;
+    padding:25px;
+    color:#2b2b2b;
+    overflow-x:hidden;
 }
+.snowflake{
+    position:fixed;
+    top:-10px;
+    color:white;
+    font-size:10px;
+    animation:fall linear infinite;
+    opacity:0.8;
+}
+@keyframes fall{
+    to{transform:translateY(110vh)}
+}
+
 .container{
-    background:#fff;
+    background:#fffaf5;
     width:100%;
-    max-width:520px;
-    border-radius:18px;
-    padding:18px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    max-width:560px;
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.45);
+    border:1px solid #e6d5c3;
 }
-h1{text-align:center;color:#1e3a8a;font-size:22px}
+
+h1{text-align:center;color:#5c1a1a;font-size:24px;margin-bottom:8px}
 
 input,select{
     width:100%;
-    padding:8px;
-    margin:5px 0;
-    border-radius:8px;
-    border:1px solid #cbd5e1;
+    padding:10px;
+    margin:6px 0;
+    border-radius:10px;
+    border:1px solid #d6c2b1;
     font-size:13px;
+    background:#fff;
 }
 
 button{
     width:100%;
-    padding:8px;
-    margin-top:6px;
+    padding:10px;
+    margin-top:8px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     font-weight:bold;
     cursor:pointer;
 }
-.primary{background:#2563eb;color:white}
-.danger{background:#ef4444;color:white}
+
+.primary{background:#7a1f1f;color:white}
+.danger{background:#444;color:white}
 
 .viagem{
-    background:#f1f5f9;
-    margin-top:12px;
-    padding:10px;
-    border-radius:14px;
+    background:#fff;
+    margin-top:15px;
+    padding:14px;
+    border-radius:16px;
+    border:1px solid #eaded3;
 }
 
 .categoria-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    background:#e2e8f0;
-    padding:6px 8px;
-    border-radius:8px;
-    margin-top:6px;
+    background:linear-gradient(90deg,#5c1a1a,#7a1f1f);
+    color:white;
+    padding:7px 10px;
+    border-radius:10px;
+    margin-top:8px;
     cursor:pointer;
     font-size:13px;
     font-weight:bold;
 }
 
-.gastos-lista{display:none;margin-top:4px;padding-left:8px}
-.gasto{display:flex;justify-content:space-between;font-size:12px;margin:4px 0}
-.pago{text-decoration:line-through;color:#16a34a}
-
-.resumo{
+.gastos-lista{
+    display:none;
     margin-top:6px;
-    background:white;
     padding:6px;
-    border-radius:8px;
-    font-size:12px;
+    background:#fffaf5;
+    border-radius:10px;
 }
 
-canvas{margin-top:15px}
+.gasto{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    margin:6px 0;
+    padding:4px 0;
+    border-bottom:1px dashed #e5d5c5;
+}
+
+.pago{text-decoration:line-through;color:#15803d;font-weight:bold}
+
+.resumo{
+    margin-top:10px;
+    background:#fff;
+    padding:10px;
+    border-radius:10px;
+    font-size:12px;
+    border:1px solid #eaded3;
+    line-height:1.6;
+}
+
+canvas{margin-top:18px;background:#fff;padding:8px;border-radius:12px}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>❄️ Viagem para Gramado</h1>
+<h1>❄️ Viagem para Gramado</h1>
 
-    <div id="contador" style="text-align:center;font-size:13px;margin-bottom:8px;color:#1e3a8a;font-weight:bold"></div>
+<select id="categoria">
+<option>Passagem</option>
+<option>Hotel</option>
+<option>Alimentação</option>
+<option>Passeios</option>
+<option>Transporte</option>
+<option>Outros</option>
+</select>
 
-    <div style="margin-top:10px;border-radius:12px;overflow:hidden">
-        <iframe src="https://www.google.com/maps?q=Gramado+RS&output=embed"
-        width="100%" height="180" style="border:0"></iframe>
-    </div>
+<input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
+<input type="number" id="valor" placeholder="Valor R$">
 
-    <div id="climaBox" style="margin-top:10px;background:#e0f2fe;padding:8px;border-radius:10px;font-size:12px;color:#0c4a6e">
-        🌤️ Carregando clima de Gramado...
-    </div>
+<select id="pagamento">
+<option value="cartao">Pago no Cartão</option>
+<option value="dinheiro">Pago em Dinheiro</option>
+</select>
 
-    <select id="categoria" onchange="verificarOutro()">
-        <option>Passagem</option>
-        <option>Hotel</option>
-        <option>Alimentação</option>
-        <option>Passeios</option>
-        <option>Transporte</option>
-        <option>Outros</option>
-    </select>
+<button class="primary" onclick="adicionarGasto()">Adicionar</button>
+<button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
-    <input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
-    <input type="number" id="valor" placeholder="Valor R$">
-
-    <button class="primary" onclick="adicionarGasto()">Adicionar</button>
-    <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
-
-    <div id="viagens"></div>
-    <canvas id="grafico"></canvas>
+<div id="viagens"></div>
+<canvas id="grafico"></canvas>
 </div>
 
 <script>
@@ -127,24 +158,23 @@ let chart;
 
 function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
 
-function verificarOutro(){
-    nomeItem.placeholder = categoriaInput.value==="Outros"
-        ? "Descreva o que é esse gasto"
-        : "Nome do gasto/passeio";
-}
-
 function adicionarGasto(){
-    const categoria = categoriaInput.value;
-    const nome = nomeItem.value.trim();
-    const valor = parseFloat(valorInput.value);
-    if(!nome || !valor) return alert("Preencha tudo!");
-    viagens[0].gastos.push({ categoria, nome, valor, pago:false });
-    salvar(); renderizar();
+    const categoria=categoria.value;
+    const nome=nomeItem.value.trim();
+    const valor=parseFloat(valorInput.value);
+    const pagamentoTipo=pagamento.value;
+
+    if(!nome||!valor) return alert("Preencha tudo!");
+
+    viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
+    salvar();
+    renderizar();
 }
 
-function togglePago(g){
-    viagens[0].gastos[g].pago = !viagens[0].gastos[g].pago;
-    salvar(); renderizar();
+function togglePago(i){
+    viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago;
+    salvar();
+    renderizar();
 }
 
 function toggleCategoria(id){
@@ -154,15 +184,16 @@ function toggleCategoria(id){
 
 function limparTudo(){
     if(confirm("Apagar todos os gastos?")){
-        viagens[0].gastos=[]; salvar(); renderizar();
+        viagens[0].gastos=[];
+        salvar();
+        renderizar();
     }
 }
 
 function renderizar(){
     viagensDiv.innerHTML="";
-    let total=0,pago=0,categoriasTotais={};
+    let total=0,pago=0,cartao=0,dinheiro=0,categoriasTotais={};
     let v=viagens[0];
-    let html=`<div class="viagem"><strong>${v.destino}</strong>`;
     const grupos={};
 
     v.gastos.forEach((g,i)=>{
@@ -170,19 +201,19 @@ function renderizar(){
         grupos[g.categoria].push({g,i});
         total+=g.valor;
         if(g.pago) pago+=g.valor;
+        if(g.pagamento==="cartao") cartao+=g.valor;
+        else dinheiro+=g.valor;
         categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
     });
 
+    let html=`<div class="viagem"><strong>${v.destino}</strong>`;
+
     for(const cat in grupos){
         const id=`cat-${cat}`;
-
-        let totalCategoria = 0;
-        grupos[cat].forEach(obj => totalCategoria += obj.g.valor);
-
+        const totalCat=grupos[cat].reduce((s,o)=>s+o.g.valor,0);
         html+=`
         <div class="categoria-header" onclick="toggleCategoria('${id}')">
-            <span>${cat}</span>
-            <span>R$ ${totalCategoria.toFixed(2)} ▶</span>
+            <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span>
         </div>
         <div class="gastos-lista" id="${id}">`;
 
@@ -192,7 +223,7 @@ function renderizar(){
                 <span>
                     <input type="checkbox" ${obj.g.pago?"checked":""}
                     onclick="togglePago(${obj.i})">
-                    ${obj.g.nome}
+                    ${obj.g.nome} (${obj.g.pagamento})
                 </span>
                 <span>R$${obj.g.valor.toFixed(2)}</span>
             </div>`;
@@ -202,14 +233,16 @@ function renderizar(){
     }
 
     let falta=total-pago;
-    let porcentagem = total>0 ? ((pago/total)*100).toFixed(1) : 0;
+    let porcentagem=((pago/total)*100||0).toFixed(1);
 
     html+=`
     <div class="resumo">
     Total: R$${total.toFixed(2)}<br>
-    Pago: <span style="color:#16a34a">R$${pago.toFixed(2)}</span><br>
-    Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span><br>
-    Progresso Pago: <strong>${porcentagem}%</strong>
+    Pago: R$${pago.toFixed(2)}<br>
+    Falta: R$${falta.toFixed(2)}<br>
+    💳 Cartão: R$${cartao.toFixed(2)}<br>
+    💵 Dinheiro: R$${dinheiro.toFixed(2)}<br>
+    ✔ ${porcentagem}% da viagem paga
     </div></div>`;
 
     viagensDiv.innerHTML=html;
@@ -221,50 +254,30 @@ function atualizarGrafico(dados){
     if(chart) chart.destroy();
     chart=new Chart(ctx,{
         type:'doughnut',
-        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] }
+        data:{labels:Object.keys(dados),datasets:[{data:Object.values(dados)}]}
     });
 }
 
-/* ⏳ CONTADOR */
-const dataViagem = new Date("2027-01-04T00:00:00");
-function atualizarContador(){
-    const agora = new Date();
-    const diff = dataViagem - agora;
-    if(diff <= 0){ contador.innerText="A viagem começou! ✈️"; return; }
-    const dias=Math.floor(diff/(1000*60*60*24));
-    const horas=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-    const minutos=Math.floor((diff%(1000*60*60))/(1000*60));
-    const segundos=Math.floor((diff%(1000*60))/1000);
-    contador.innerText=`Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s para Gramado`;
-}
-setInterval(atualizarContador,1000);
-atualizarContador();
-
-/* 🌦️ CLIMA */
-async function carregarClima(){
-    try{
-        const lat=-29.374, lon=-50.876;
-        const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-        const data=await res.json();
-        const temp=data.current_weather.temperature;
-        const vento=data.current_weather.windspeed;
-        const codigo=data.current_weather.weathercode;
-        climaBox.innerHTML=`🌡️ <strong>${temp}°C</strong> | 💨 Vento ${vento} km/h <br> ☁️ ${traduzirTempo(codigo)} em Gramado agora`;
-    }catch{ climaBox.innerText="Não foi possível carregar o clima."; }
-}
-function traduzirTempo(code){
-    const mapa={0:"Céu limpo ☀️",1:"Principalmente limpo 🌤️",2:"Parcialmente nublado ⛅",3:"Nublado ☁️",61:"Chuva leve 🌧️",63:"Chuva moderada 🌧️",80:"Pancadas de chuva 🌦️",95:"Tempestade ⛈️"};
-    return mapa[code]||"Clima variado";
-}
-carregarClima();
-setInterval(carregarClima,600000);
-
-const categoriaInput=document.getElementById("categoria");
+const categoria=document.getElementById("categoria");
 const nomeItem=document.getElementById("nomeItem");
 const valorInput=document.getElementById("valor");
+const pagamento=document.getElementById("pagamento");
 const viagensDiv=document.getElementById("viagens");
 
 renderizar();
+
+/* ❄️ NEVE ANIMADA */
+setInterval(()=>{
+    const snow=document.createElement("div");
+    snow.className="snowflake";
+    snow.innerHTML="❄";
+    snow.style.left=Math.random()*window.innerWidth+"px";
+    snow.style.animationDuration=(Math.random()*3+2)+"s";
+    snow.style.fontSize=(Math.random()*10+10)+"px";
+    document.body.appendChild(snow);
+    setTimeout(()=>snow.remove(),5000);
+},200);
 </script>
 </body>
 </html>
+
