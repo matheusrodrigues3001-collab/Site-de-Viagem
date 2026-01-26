@@ -2,53 +2,50 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Controle de Viagens</title>
+<title>Planejador de Viagens</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
     margin: 0;
     padding: 20px;
-    color: #111;
-}
-
-h1 {
-    text-align: center;
     color: white;
 }
+
+h1 { text-align: center; }
 
 .container {
     max-width: 1000px;
     margin: auto;
     background: white;
+    color: black;
     padding: 25px;
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
-input, button {
-    padding: 10px;
-    margin: 6px 0;
+input {
+    padding: 8px;
     width: 100%;
-    border-radius: 8px;
+    margin: 5px 0;
+    border-radius: 6px;
     border: 1px solid #ccc;
-    font-size: 14px;
 }
 
 button {
-    background: #1e40af;
+    padding: 10px;
+    width: 100%;
+    background: #2563eb;
     color: white;
     font-weight: bold;
     border: none;
+    border-radius: 8px;
     cursor: pointer;
-    transition: 0.2s;
 }
 
-button:hover {
-    transform: scale(1.02);
-    background: #1e3a8a;
-}
+button:hover { background: #1e40af; }
 
 table {
     width: 100%;
@@ -56,63 +53,44 @@ table {
     border-collapse: collapse;
 }
 
-th {
-    background: #1e40af;
-    color: white;
-}
-
 th, td {
-    padding: 10px;
+    padding: 8px;
     border-bottom: 1px solid #ddd;
     text-align: center;
 }
 
-.delete-btn {
-    background: #dc2626;
-    padding: 6px 10px;
-    border-radius: 6px;
-}
-
 .total {
     font-size: 18px;
+    margin-top: 10px;
     font-weight: bold;
-    margin-top: 20px;
-    text-align: right;
-}
-
-canvas {
-    margin-top: 30px;
 }
 </style>
 </head>
 <body>
 
-<h1>🌍 Viagens do Matheus</h1>
+<h1>🌍 Planejamento de Viagens do Matheus</h1>
 
 <div class="container">
 
-<h2>Adicionar Passeio</h2>
-<input type="text" id="local" placeholder="Local">
-<input type="date" id="data">
-<input type="number" id="transporte" placeholder="Transporte">
-<input type="number" id="alimentacao" placeholder="Alimentação">
-<input type="number" id="passeios" placeholder="Passeios/Ingressos">
-<input type="number" id="hospedagem" placeholder="Hospedagem">
-<input type="text" id="obs" placeholder="Observações">
+<h2>Nova Viagem</h2>
+<input type="text" id="local" placeholder="Destino">
+<input type="number" id="passagem" placeholder="Valor Passagem">
+<input type="number" id="hotel" placeholder="Valor Hotel">
+<input type="number" id="alimentacao" placeholder="Valor Alimentação">
+<input type="number" id="passeios" placeholder="Valor Passeios">
+<input type="number" id="transporte" placeholder="Valor Transporte Local">
 
-<button onclick="adicionarViagem()">Adicionar Viagem</button>
+<button onclick="adicionarViagem()">Salvar Viagem</button>
 
-<table id="tabela">
+<table>
 <thead>
 <tr>
-<th>Local</th>
-<th>Data</th>
+<th>Destino</th>
 <th>Total</th>
-<th>Obs</th>
-<th>Ação</th>
+<th>Checklist</th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody id="tabela"></tbody>
 </table>
 
 <div class="total" id="totalGeral"></div>
@@ -124,52 +102,64 @@ canvas {
 <script>
 let viagens = JSON.parse(localStorage.getItem("viagens")) || [];
 
-function salvarDados() {
+function salvar() {
     localStorage.setItem("viagens", JSON.stringify(viagens));
 }
 
 function adicionarViagem() {
     const viagem = {
         local: local.value,
-        data: data.value,
-        transporte: parseFloat(transporte.value) || 0,
-        alimentacao: parseFloat(alimentacao.value) || 0,
-        passeios: parseFloat(passeios.value) || 0,
-        hospedagem: parseFloat(hospedagem.value) || 0,
-        obs: obs.value
+        passagem: +passagem.value || 0,
+        hotel: +hotel.value || 0,
+        alimentacao: +alimentacao.value || 0,
+        passeios: +passeios.value || 0,
+        transporte: +transporte.value || 0,
+        pago: {
+            passagem:false,
+            hotel:false,
+            alimentacao:false,
+            passeios:false,
+            transporte:false
+        }
     };
 
-    viagem.total = viagem.transporte + viagem.alimentacao + viagem.passeios + viagem.hospedagem;
+    viagem.total = viagem.passagem + viagem.hotel + viagem.alimentacao + viagem.passeios + viagem.transporte;
     viagens.push(viagem);
-    salvarDados();
+    salvar();
     atualizarTela();
-    document.querySelectorAll("input").forEach(i => i.value = "");
 }
 
-function excluirViagem(index) {
-    viagens.splice(index, 1);
-    salvarDados();
+function togglePago(i, tipo) {
+    viagens[i].pago[tipo] = !viagens[i].pago[tipo];
+    salvar();
     atualizarTela();
 }
 
 function atualizarTela() {
-    const tbody = document.querySelector("#tabela tbody");
+    const tbody = document.getElementById("tabela");
     tbody.innerHTML = "";
     let totalGeral = 0;
 
-    viagens.forEach((v, i) => {
+    viagens.forEach((v,i)=>{
         totalGeral += v.total;
-        const linha = tbody.insertRow();
-        linha.innerHTML = `
-            <td>${v.local}</td>
-            <td>${v.data}</td>
-            <td>R$ ${v.total.toFixed(2)}</td>
-            <td>${v.obs}</td>
-            <td><button class="delete-btn" onclick="excluirViagem(${i})">X</button></td>
+
+        const checklist = `
+        ✈️ <input type="checkbox" ${v.pago.passagem?"checked":""} onclick="togglePago(${i},'passagem')">
+        🏨 <input type="checkbox" ${v.pago.hotel?"checked":""} onclick="togglePago(${i},'hotel')">
+        🍔 <input type="checkbox" ${v.pago.alimentacao?"checked":""} onclick="togglePago(${i},'alimentacao')">
+        🎟 <input type="checkbox" ${v.pago.passeios?"checked":""} onclick="togglePago(${i},'passeios')">
+        🚕 <input type="checkbox" ${v.pago.transporte?"checked":""} onclick="togglePago(${i},'transporte')">
         `;
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${v.local}</td>
+            <td>R$ ${v.total.toFixed(2)}</td>
+            <td>${checklist}</td>
+        </tr>`;
     });
 
-    document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2);
+    document.getElementById("totalGeral").innerText = "Total Geral Planejado: R$ " + totalGeral.toFixed(2);
     atualizarGrafico();
 }
 
@@ -178,18 +168,24 @@ let grafico;
 function atualizarGrafico() {
     const ctx = document.getElementById('grafico').getContext('2d');
 
-    const labels = viagens.map(v => v.local);
-    const valores = viagens.map(v => v.total);
+    let soma = {passagem:0, hotel:0, alimentacao:0, passeios:0, transporte:0};
 
-    if (grafico) grafico.destroy();
+    viagens.forEach(v=>{
+        soma.passagem += v.passagem;
+        soma.hotel += v.hotel;
+        soma.alimentacao += v.alimentacao;
+        soma.passeios += v.passeios;
+        soma.transporte += v.transporte;
+    });
+
+    if(grafico) grafico.destroy();
 
     grafico = new Chart(ctx, {
-        type: 'bar',
+        type: 'pie',
         data: {
-            labels: labels,
+            labels: ['Passagem','Hotel','Alimentação','Passeios','Transporte'],
             datasets: [{
-                label: 'Gastos por Viagem (R$)',
-                data: valores
+                data: Object.values(soma)
             }]
         }
     });
@@ -200,4 +196,3 @@ atualizarTela();
 
 </body>
 </html>
-
