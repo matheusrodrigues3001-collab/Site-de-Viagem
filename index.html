@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Planejador de Viagens</title>
+<title>Viagem para Gramado</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -85,9 +85,7 @@ canvas{margin-top:15px}
 <body>
 
 <div class="container">
-    <h1>✈️ Minhas Viagens</h1>
-
-    <input type="text" id="destino" placeholder="Destino">
+    <h1>❄️ Viagem para Gramado</h1>
 
     <select id="categoria" onchange="verificarOutro()">
         <option>Passagem</option>
@@ -109,40 +107,35 @@ canvas{margin-top:15px}
 </div>
 
 <script>
-let viagens = JSON.parse(localStorage.getItem("viagens")) || [];
+let viagens = JSON.parse(localStorage.getItem("viagens")) || [{
+    destino:"Gramado",
+    gastos:[]
+}];
+
 let chart;
 
 function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
 
 function verificarOutro(){
-    if(categoriaInput.value==="Outros"){
-        nomeItem.placeholder="Descreva o que é esse gasto";
-    } else {
-        nomeItem.placeholder="Nome do gasto/passeio";
-    }
+    nomeItem.placeholder = categoriaInput.value==="Outros"
+        ? "Descreva o que é esse gasto"
+        : "Nome do gasto/passeio";
 }
 
 function adicionarGasto(){
-    const destino = destinoInput.value.trim();
     const categoria = categoriaInput.value;
     const nome = nomeItem.value.trim();
     const valor = parseFloat(valorInput.value);
 
-    if(!destino || !nome || !valor) return alert("Preencha tudo!");
+    if(!nome || !valor) return alert("Preencha tudo!");
 
-    let viagem = viagens.find(v => v.destino === destino);
-    if(!viagem){
-        viagem = { destino, gastos: [] };
-        viagens.push(viagem);
-    }
-
-    viagem.gastos.push({ categoria, nome, valor, pago:false });
+    viagens[0].gastos.push({ categoria, nome, valor, pago:false });
     salvar();
     renderizar();
 }
 
-function togglePago(v,g){
-    viagens[v].gastos[g].pago = !viagens[v].gastos[g].pago;
+function togglePago(g){
+    viagens[0].gastos[g].pago = !viagens[0].gastos[g].pago;
     salvar();
     renderizar();
 }
@@ -153,8 +146,8 @@ function toggleCategoria(id){
 }
 
 function limparTudo(){
-    if(confirm("Apagar tudo?")){
-        viagens=[];
+    if(confirm("Apagar todos os gastos?")){
+        viagens[0].gastos=[];
         salvar();
         renderizar();
     }
@@ -162,55 +155,52 @@ function limparTudo(){
 
 function renderizar(){
     viagensDiv.innerHTML="";
-    let categoriasTotais={};
+    let total=0,pago=0,categoriasTotais={};
+    let v=viagens[0];
 
-    viagens.forEach((v,vIndex)=>{
-        let total=0,pago=0;
-        let html=`<div class="viagem"><strong>${v.destino}</strong>`;
+    let html=`<div class="viagem"><strong>${v.destino}</strong>`;
+    const grupos={};
 
-        const grupos={};
-        v.gastos.forEach((g,i)=>{
-            if(!grupos[g.categoria]) grupos[g.categoria]=[];
-            grupos[g.categoria].push({g,i});
-            total+=g.valor;
-            if(g.pago) pago+=g.valor;
-            categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
-        });
-
-        for(const cat in grupos){
-            const id=`cat-${vIndex}-${cat}`;
-            html+=`
-            <div class="categoria-header" onclick="toggleCategoria('${id}')">
-                <span>${cat}</span><span>▶</span>
-            </div>
-            <div class="gastos-lista" id="${id}">`;
-
-            grupos[cat].forEach(obj=>{
-                html+=`
-                <div class="gasto ${obj.g.pago?"pago":""}">
-                    <span>
-                        <input type="checkbox" ${obj.g.pago?"checked":""}
-                        onclick="togglePago(${vIndex},${obj.i})">
-                        ${obj.g.nome}
-                    </span>
-                    <span>R$${obj.g.valor.toFixed(2)}</span>
-                </div>`;
-            });
-
-            html+=`</div>`;
-        }
-
-        let falta=total-pago;
-        html+=`
-        <div class="resumo">
-        Total: R$${total.toFixed(2)}<br>
-        Pago: <span style="color:#16a34a">R$${pago.toFixed(2)}</span><br>
-        Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span>
-        </div></div>`;
-
-        viagensDiv.innerHTML+=html;
+    v.gastos.forEach((g,i)=>{
+        if(!grupos[g.categoria]) grupos[g.categoria]=[];
+        grupos[g.categoria].push({g,i});
+        total+=g.valor;
+        if(g.pago) pago+=g.valor;
+        categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
     });
 
+    for(const cat in grupos){
+        const id=`cat-${cat}`;
+        html+=`
+        <div class="categoria-header" onclick="toggleCategoria('${id}')">
+            <span>${cat}</span><span>▶</span>
+        </div>
+        <div class="gastos-lista" id="${id}">`;
+
+        grupos[cat].forEach(obj=>{
+            html+=`
+            <div class="gasto ${obj.g.pago?"pago":""}">
+                <span>
+                    <input type="checkbox" ${obj.g.pago?"checked":""}
+                    onclick="togglePago(${obj.i})">
+                    ${obj.g.nome}
+                </span>
+                <span>R$${obj.g.valor.toFixed(2)}</span>
+            </div>`;
+        });
+
+        html+=`</div>`;
+    }
+
+    let falta=total-pago;
+    html+=`
+    <div class="resumo">
+    Total: R$${total.toFixed(2)}<br>
+    Pago: <span style="color:#16a34a">R$${pago.toFixed(2)}</span><br>
+    Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span>
+    </div></div>`;
+
+    viagensDiv.innerHTML=html;
     atualizarGrafico(categoriasTotais);
 }
 
@@ -223,7 +213,6 @@ function atualizarGrafico(dados){
     });
 }
 
-const destinoInput=document.getElementById("destino");
 const categoriaInput=document.getElementById("categoria");
 const nomeItem=document.getElementById("nomeItem");
 const valorInput=document.getElementById("valor");
