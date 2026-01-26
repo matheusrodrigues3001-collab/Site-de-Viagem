@@ -148,8 +148,8 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <input type="number" id="valor" placeholder="Valor R$">
 
 <select id="pagamento">
-<option value="cartao">Pago no Cartão</option>
-<option value="dinheiro">Pago em Dinheiro</option>
+<option value="cartao">💳 Cartão</option>
+<option value="dinheiro">💵 Dinheiro</option>
 </select>
 
 <button class="primary" onclick="adicionarGasto()">Adicionar</button>
@@ -184,10 +184,18 @@ function adicionarGasto(){
     const nome=nomeItem.value.trim();
     const valor=parseFloat(valorInput.value);
     const pagamentoTipo=pagamentoSel.value;
+
     if(!nome||!valor) return alert("Preencha tudo!");
 
     viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
     salvar(); renderizar();
+
+    // 🧹 limpa campos
+    nomeItem.value="";
+    valorInput.value="";
+    categoriaSel.selectedIndex=0;
+    pagamentoSel.selectedIndex=0;
+    nomeItem.focus();
 }
 
 function togglePago(i){
@@ -237,7 +245,7 @@ function renderizar(){
                 <span>
                 <input type="checkbox" ${obj.g.pago?"checked":""}
                 onclick="togglePago(${obj.i})">
-                ${obj.g.nome} (${obj.g.pagamento})
+                ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})
                 </span>
                 <span>R$${obj.g.valor.toFixed(2)}</span>
             </div>`;
@@ -272,7 +280,7 @@ function atualizarGrafico(dados){
     });
 }
 
-/* 🌡️ CLIMA GRAMADO */
+/* 🌡️ CLIMA */
 fetch("https://api.open-meteo.com/v1/forecast?latitude=-29.37&longitude=-50.88&current_weather=true")
 .then(r=>r.json())
 .then(d=>{
