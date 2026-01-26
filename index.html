@@ -1,1 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Minhas Viagens</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #1e40af;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+        padding: 8px;
+        margin: 5px 0;
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        background: #1e40af;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1e3a8a;
+    }
+
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .total {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 20px;
+        text-align: right;
+        color: #111827;
+    }
+</style>
+</head>
+<body>
+
+<h1>🌍 Controle de Viagens do Matheus</h1>
+
+<div class="container">
+    <h2>Adicionar Passeio</h2>
+
+    <input type="text" id="local" placeholder="Local do passeio">
+    <input type="date" id="data">
+    <input type="number" id="transporte" placeholder="Valor transporte">
+    <input type="number" id="alimentacao" placeholder="Valor alimentação">
+    <input type="number" id="passeios" placeholder="Valor passeios/ingressos">
+    <input type="number" id="hospedagem" placeholder="Valor hospedagem">
+    <input type="text" id="obs" placeholder="Observações">
+
+    <button onclick="adicionarViagem()">Adicionar</button>
+
+    <table id="tabela">
+        <thead>
+            <tr>
+                <th>Local</th>
+                <th>Data</th>
+                <th>Total</th>
+                <th>Obs</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div class="total" id="totalGeral">Total Geral: R$ 0,00</div>
+</div>
+
+<script>
+let totalGeral = 0;
+
+function adicionarViagem() {
+    const local = document.getElementById('local').value;
+    const data = document.getElementById('data').value;
+    const transporte = parseFloat(document.getElementById('transporte').value) || 0;
+    const alimentacao = parseFloat(document.getElementById('alimentacao').value) || 0;
+    const passeios = parseFloat(document.getElementById('passeios').value) || 0;
+    const hospedagem = parseFloat(document.getElementById('hospedagem').value) || 0;
+    const obs = document.getElementById('obs').value;
+
+    const totalViagem = transporte + alimentacao + passeios + hospedagem;
+    totalGeral += totalViagem;
+
+    const tabela = document.querySelector("#tabela tbody");
+    const linha = tabela.insertRow();
+
+    linha.insertCell(0).innerText = local;
+    linha.insertCell(1).innerText = data;
+    linha.insertCell(2).innerText = "R$ " + totalViagem.toFixed(2);
+    linha.insertCell(3).innerText = obs;
+
+    document.getElementById("totalGeral").innerText = "Total Geral: R$ " + totalGeral.toFixed(2);
+
+    document.querySelectorAll("input").forEach(i => i.value = "");
+}
+</script>
+
+</body>
+</html>
 
