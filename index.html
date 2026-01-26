@@ -126,7 +126,6 @@ button{
 }
 
 iframe{width:100%;border-radius:12px;margin-top:6px}
-
 canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 </style>
 </head>
@@ -156,6 +155,10 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
 <div id="viagens"></div>
+
+<!-- ⏳ CONTAGEM REGRESSIVA -->
+<div class="extra-box" id="countdownBox">⏳ Carregando contagem...</div>
+
 <canvas id="grafico"></canvas>
 
 <div class="extra-box" id="climaBox">🌡️ Carregando clima...</div>
@@ -184,40 +187,22 @@ function adicionarGasto(){
     const nome=nomeItem.value.trim();
     const valor=parseFloat(valorInput.value);
     const pagamentoTipo=pagamentoSel.value;
-
     if(!nome||!valor) return alert("Preencha tudo!");
-
     viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
     salvar(); renderizar();
-
-    // 🧹 limpa campos
-    nomeItem.value="";
-    valorInput.value="";
-    categoriaSel.selectedIndex=0;
-    pagamentoSel.selectedIndex=0;
-    nomeItem.focus();
+    nomeItem.value=""; valorInput.value="";
 }
 
-function togglePago(i){
-    viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago;
-    salvar(); renderizar();
-}
-
+function togglePago(i){ viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago; salvar(); renderizar(); }
 function toggleCategoria(id){
     const el=document.getElementById(id);
     el.style.display=el.style.display==="none"?"block":"none";
 }
-
-function limparTudo(){
-    if(confirm("Apagar todos os gastos?")){
-        viagens[0].gastos=[]; salvar(); renderizar();
-    }
-}
+function limparTudo(){ if(confirm("Apagar todos os gastos?")){ viagens[0].gastos=[]; salvar(); renderizar(); } }
 
 function renderizar(){
     viagensDiv.innerHTML="";
-    let total=0,pago=0,cartao=0,dinheiro=0,categoriasTotais={};
-    const grupos={};
+    let total=0,pago=0,cartao=0,dinheiro=0,categoriasTotais={},grupos={};
 
     viagens[0].gastos.forEach((g,i)=>{
         if(!grupos[g.categoria]) grupos[g.categoria]=[];
@@ -229,42 +214,29 @@ function renderizar(){
     });
 
     let html=`<div class="viagem"><strong>Gramado</strong>`;
-
     for(const cat in grupos){
         const id=`cat-${cat}`;
         const totalCat=grupos[cat].reduce((s,o)=>s+o.g.valor,0);
-        html+=`
-        <div class="categoria-header" onclick="toggleCategoria('${id}')">
-            <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span>
-        </div>
-        <div class="gastos-lista" id="${id}">`;
-
+        html+=`<div class="categoria-header" onclick="toggleCategoria('${id}')">
+            <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span></div>
+            <div class="gastos-lista" id="${id}">`;
         grupos[cat].forEach(obj=>{
-            html+=`
-            <div class="gasto ${obj.g.pago?"pago":""}">
-                <span>
-                <input type="checkbox" ${obj.g.pago?"checked":""}
+            html+=`<div class="gasto ${obj.g.pago?"pago":""}">
+                <span><input type="checkbox" ${obj.g.pago?"checked":""}
                 onclick="togglePago(${obj.i})">
                 ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})
-                </span>
-                <span>R$${obj.g.valor.toFixed(2)}</span>
-            </div>`;
+                </span><span>R$${obj.g.valor.toFixed(2)}</span></div>`;
         });
-
         html+=`</div>`;
     }
 
     let falta=total-pago;
-    let porcentagem=((pago/total)*100||0).toFixed(1);
-
-    html+=`
-    <div class="resumo">
+    html+=`<div class="resumo">
     Total: R$${total.toFixed(2)}<br>
     Pago: R$${pago.toFixed(2)}<br>
     Falta: R$${falta.toFixed(2)}<br>
     💳 Cartão: R$${cartao.toFixed(2)}<br>
-    💵 Dinheiro: R$${dinheiro.toFixed(2)}<br>
-    ✔ ${porcentagem}% pago
+    💵 Dinheiro: R$${dinheiro.toFixed(2)}
     </div></div>`;
 
     viagensDiv.innerHTML=html;
@@ -274,18 +246,13 @@ function renderizar(){
 function atualizarGrafico(dados){
     const ctx=document.getElementById('grafico');
     if(chart) chart.destroy();
-    chart=new Chart(ctx,{
-        type:'doughnut',
-        data:{labels:Object.keys(dados),datasets:[{data:Object.values(dados)}]}
-    });
+    chart=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(dados),datasets:[{data:Object.values(dados)}]}});
 }
 
 /* 🌡️ CLIMA */
 fetch("https://api.open-meteo.com/v1/forecast?latitude=-29.37&longitude=-50.88&current_weather=true")
 .then(r=>r.json())
-.then(d=>{
-    climaBox.innerHTML=`🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h`;
-});
+.then(d=>climaBox.innerHTML=`🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h`);
 
 /* ❄️ NEVE */
 setInterval(()=>{
@@ -298,6 +265,23 @@ setInterval(()=>{
     document.body.appendChild(snow);
     setTimeout(()=>snow.remove(),5000);
 },200);
+
+/* ⏳ CONTAGEM REGRESSIVA */
+const dataViagem = new Date("2027-01-04T00:00:00").getTime();
+const countdownBox = document.getElementById("countdownBox");
+
+function atualizarContagem(){
+    const agora = new Date().getTime();
+    const diff = dataViagem - agora;
+    if(diff<=0){ countdownBox.innerHTML="🎉 A viagem para Gramado chegou!"; return; }
+    const dias=Math.floor(diff/(1000*60*60*24));
+    const horas=Math.floor((diff/(1000*60*60))%24);
+    const minutos=Math.floor((diff/1000/60)%60);
+    const segundos=Math.floor((diff/1000)%60);
+    countdownBox.innerHTML=`⏳ Faltam <strong>${dias}</strong>d <strong>${horas}</strong>h <strong>${minutos}</strong>m <strong>${segundos}</strong>s`;
+}
+setInterval(atualizarContagem,1000);
+atualizarContagem();
 
 const categoriaSel=document.getElementById("categoria");
 const nomeItem=document.getElementById("nomeItem");
