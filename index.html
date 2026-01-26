@@ -3,222 +3,258 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Viagem para Gramado</title>
+<title>Planejamento de Viagem - Gramado</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{box-sizing:border-box}
 body{
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,#dbeafe,#f0f9ff);
     margin:0;
-    font-family:'Segoe UI', sans-serif;
-    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    padding:20px;
     display:flex;
     justify-content:center;
-    padding:20px;
 }
 .container{
-    background:#fff;
+    background:white;
     width:100%;
-    max-width:520px;
-    border-radius:18px;
+    max-width:820px;
+    border-radius:14px;
     padding:18px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
-h1{text-align:center;color:#1e3a8a;font-size:22px}
-
-input,select{
-    width:100%;
+h1{
+    text-align:center;
+    margin:0;
+    font-size:22px;
+}
+.subtitle{
+    text-align:center;
+    color:#555;
+    margin-bottom:10px;
+}
+.countdown{
+    text-align:center;
+    font-weight:bold;
+    background:#eff6ff;
     padding:8px;
-    margin:5px 0;
     border-radius:8px;
+    margin-bottom:15px;
+}
+
+.section{
+    margin-bottom:12px;
+    background:#f8fafc;
+    padding:10px;
+    border-radius:10px;
+}
+.section h2{
+    font-size:15px;
+    margin:0 0 8px 0;
+}
+input{
+    padding:6px;
+    border-radius:6px;
     border:1px solid #cbd5e1;
     font-size:13px;
 }
-
 button{
-    width:100%;
-    padding:8px;
-    margin-top:6px;
+    padding:6px 10px;
     border:none;
-    border-radius:10px;
-    font-weight:bold;
+    border-radius:6px;
     cursor:pointer;
-}
-.primary{background:#2563eb;color:white}
-.danger{background:#ef4444;color:white}
-
-.viagem{
-    background:#f1f5f9;
-    margin-top:12px;
-    padding:10px;
-    border-radius:14px;
-}
-
-.categoria-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:#e2e8f0;
-    padding:6px 8px;
-    border-radius:8px;
-    margin-top:6px;
-    cursor:pointer;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.gastos-lista{display:none;margin-top:4px;padding-left:8px}
-.gasto{display:flex;justify-content:space-between;font-size:12px;margin:4px 0}
-.pago{text-decoration:line-through;color:#16a34a}
-
-.resumo{
-    margin-top:6px;
-    background:white;
-    padding:6px;
-    border-radius:8px;
     font-size:12px;
 }
+.btn-primary{ background:#2563eb;color:white;}
+.btn-danger{ background:#dc2626;color:white;}
+.btn-secondary{ background:#64748b;color:white;}
 
-canvas{margin-top:15px}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 90px 60px;
+    gap:6px;
+    margin-bottom:6px;
+    align-items:center;
+}
+
+.summary{
+    display:flex;
+    justify-content:space-between;
+    font-weight:bold;
+    margin-top:10px;
+    font-size:14px;
+}
+canvas{ margin-top:15px;}
+.toggle{
+    cursor:pointer;
+    font-size:12px;
+    color:#2563eb;
+}
 </style>
 </head>
+
 <body>
-
 <div class="container">
-    <h1>❄️ Viagem para Gramado</h1>
+    <h1>✈️ Viagem para Gramado</h1>
+    <div class="subtitle">Data da viagem: <b>04/01/2027</b></div>
+    <div class="countdown" id="countdown"></div>
 
-    <select id="categoria" onchange="verificarOutro()">
-        <option>Passagem</option>
-        <option>Hotel</option>
-        <option>Alimentação</option>
-        <option>Passeios</option>
-        <option>Transporte</option>
-        <option>Outros</option>
-    </select>
+    <div class="section">
+        <h2>💰 Custos Gerais</h2>
 
-    <input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
-    <input type="number" id="valor" placeholder="Valor R$">
+        <div class="grid">
+            <input placeholder="Passagem" id="passagem">
+            <input type="number" placeholder="R$" id="v_passagem">
+            <input type="checkbox" id="p_passagem">
+        </div>
 
-    <button class="primary" onclick="adicionarGasto()">Adicionar</button>
-    <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
+        <div class="grid">
+            <input placeholder="Hotel" id="hotel">
+            <input type="number" placeholder="R$" id="v_hotel">
+            <input type="checkbox" id="p_hotel">
+        </div>
 
-    <div id="viagens"></div>
+        <div class="grid">
+            <input placeholder="Alimentação" id="alimentacao">
+            <input type="number" placeholder="R$" id="v_alimentacao">
+            <input type="checkbox" id="p_alimentacao">
+        </div>
+
+        <div class="grid">
+            <input placeholder="Transporte" id="transporte">
+            <input type="number" placeholder="R$" id="v_transporte">
+            <input type="checkbox" id="p_transporte">
+        </div>
+
+        <div class="grid">
+            <input placeholder="Outros (descrever)" id="outros_nome">
+            <input type="number" placeholder="R$" id="v_outros">
+            <input type="checkbox" id="p_outros">
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎢 Passeios <span class="toggle" onclick="togglePasseios()">[expandir]</span></h2>
+        <div id="areaPasseios" style="display:none"></div>
+        <button class="btn-primary" onclick="addPasseio()">+ Adicionar passeio</button>
+    </div>
+
+    <div class="summary">
+        <span>Total: R$ <span id="total">0</span></span>
+        <span>Pago: R$ <span id="pago">0</span></span>
+        <span>Falta: R$ <span id="falta">0</span></span>
+    </div>
+
     <canvas id="grafico"></canvas>
+
+    <div style="margin-top:12px; text-align:right;">
+        <button class="btn-secondary" onclick="limpar()">Limpar</button>
+        <button class="btn-danger" onclick="excluir()">Excluir viagem</button>
+    </div>
 </div>
 
 <script>
-let viagens = JSON.parse(localStorage.getItem("viagens")) || [{
-    destino:"Gramado",
-    gastos:[]
-}];
+const viagemData = new Date("2027-01-04");
 
-let chart;
+function atualizarContador(){
+    const hoje = new Date();
+    const diff = viagemData - hoje;
+    const dias = Math.ceil(diff/(1000*60*60*24));
+    document.getElementById("countdown").innerText =
+        dias>0 ? `Faltam ${dias} dias para a viagem!` : "A viagem chegou!";
+}
+atualizarContador();
 
-function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
-
-function verificarOutro(){
-    nomeItem.placeholder = categoriaInput.value==="Outros"
-        ? "Descreva o que é esse gasto"
-        : "Nome do gasto/passeio";
+function togglePasseios(){
+    const area = document.getElementById("areaPasseios");
+    area.style.display = area.style.display==="none"?"block":"none";
 }
 
-function adicionarGasto(){
-    const categoria = categoriaInput.value;
-    const nome = nomeItem.value.trim();
-    const valor = parseFloat(valorInput.value);
-
-    if(!nome || !valor) return alert("Preencha tudo!");
-
-    viagens[0].gastos.push({ categoria, nome, valor, pago:false });
-    salvar();
-    renderizar();
+function addPasseio(nome="",valor="",pago=false){
+    const area = document.getElementById("areaPasseios");
+    const div = document.createElement("div");
+    div.className="grid";
+    div.innerHTML=`
+        <input placeholder="Nome do passeio" value="${nome}">
+        <input type="number" placeholder="R$" value="${valor}">
+        <input type="checkbox" ${pago?"checked":""}>
+    `;
+    area.appendChild(div);
 }
 
-function togglePago(g){
-    viagens[0].gastos[g].pago = !viagens[0].gastos[g].pago;
-    salvar();
-    renderizar();
-}
+function pegarValor(id){ return parseFloat(document.getElementById(id).value)||0 }
+function pegarPago(id){ return document.getElementById(id).checked }
 
-function toggleCategoria(id){
-    const el=document.getElementById(id);
-    el.style.display=el.style.display==="none"?"block":"none";
-}
+function calcular(){
+    let total=0,pago=0;
 
-function limparTudo(){
-    if(confirm("Apagar todos os gastos?")){
-        viagens[0].gastos=[];
-        salvar();
-        renderizar();
-    }
-}
+    const campos=[
+        ["v_passagem","p_passagem"],
+        ["v_hotel","p_hotel"],
+        ["v_alimentacao","p_alimentacao"],
+        ["v_transporte","p_transporte"],
+        ["v_outros","p_outros"]
+    ];
 
-function renderizar(){
-    viagensDiv.innerHTML="";
-    let total=0,pago=0,categoriasTotais={};
-    let v=viagens[0];
-
-    let html=`<div class="viagem"><strong>${v.destino}</strong>`;
-    const grupos={};
-
-    v.gastos.forEach((g,i)=>{
-        if(!grupos[g.categoria]) grupos[g.categoria]=[];
-        grupos[g.categoria].push({g,i});
-        total+=g.valor;
-        if(g.pago) pago+=g.valor;
-        categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
+    campos.forEach(c=>{
+        const v=pegarValor(c[0]);
+        total+=v;
+        if(pegarPago(c[1])) pago+=v;
     });
 
-    for(const cat in grupos){
-        const id=`cat-${cat}`;
-        html+=`
-        <div class="categoria-header" onclick="toggleCategoria('${id}')">
-            <span>${cat}</span><span>▶</span>
-        </div>
-        <div class="gastos-lista" id="${id}">`;
+    document.querySelectorAll("#areaPasseios .grid").forEach(p=>{
+        const v=parseFloat(p.children[1].value)||0;
+        total+=v;
+        if(p.children[2].checked) pago+=v;
+    });
 
-        grupos[cat].forEach(obj=>{
-            html+=`
-            <div class="gasto ${obj.g.pago?"pago":""}">
-                <span>
-                    <input type="checkbox" ${obj.g.pago?"checked":""}
-                    onclick="togglePago(${obj.i})">
-                    ${obj.g.nome}
-                </span>
-                <span>R$${obj.g.valor.toFixed(2)}</span>
-            </div>`;
-        });
+    document.getElementById("total").innerText=total.toFixed(2);
+    document.getElementById("pago").innerText=pago.toFixed(2);
+    document.getElementById("falta").innerText=(total-pago).toFixed(2);
 
-        html+=`</div>`;
-    }
-
-    let falta=total-pago;
-    html+=`
-    <div class="resumo">
-    Total: R$${total.toFixed(2)}<br>
-    Pago: <span style="color:#16a34a">R$${pago.toFixed(2)}</span><br>
-    Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span>
-    </div></div>`;
-
-    viagensDiv.innerHTML=html;
-    atualizarGrafico(categoriasTotais);
+    atualizarGrafico();
+    salvar();
 }
 
-function atualizarGrafico(dados){
-    const ctx=document.getElementById('grafico');
+setInterval(calcular,1000);
+
+function salvar(){
+    localStorage.setItem("viagemGramado", document.querySelector(".container").innerHTML);
+}
+
+function limpar(){
+    if(confirm("Limpar campos?")){
+        location.reload();
+    }
+}
+
+function excluir(){
+    if(confirm("Excluir viagem salva?")){
+        localStorage.removeItem("viagemGramado");
+        location.reload();
+    }
+}
+
+let chart;
+function atualizarGrafico(){
+    const data=[
+        pegarValor("v_passagem"),
+        pegarValor("v_hotel"),
+        pegarValor("v_alimentacao"),
+        pegarValor("v_transporte"),
+        pegarValor("v_outros")
+    ];
+    const ctx=document.getElementById("grafico");
     if(chart) chart.destroy();
     chart=new Chart(ctx,{
         type:'doughnut',
-        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] }
+        data:{
+            labels:["Passagem","Hotel","Alimentação","Transporte","Outros"],
+            datasets:[{data:data}]
+        }
     });
 }
-
-const categoriaInput=document.getElementById("categoria");
-const nomeItem=document.getElementById("nomeItem");
-const valorInput=document.getElementById("valor");
-const viagensDiv=document.getElementById("viagens");
-
-renderizar();
 </script>
 </body>
 </html>
