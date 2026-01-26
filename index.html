@@ -134,6 +134,12 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <div class="container">
 <h1>❄️ Viagem para Gramado</h1>
 
+<!-- 🎵 MÚSICA NATALINA -->
+<audio id="musicaNatal" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_5f6b0c6a9f.mp3?filename=christmas-piano-126267.mp3" type="audio/mpeg">
+</audio>
+<button onclick="toggleMusica()">🎵 Música ON/OFF</button>
+
 <select id="categoria">
 <option>Passagem</option>
 <option>Hotel</option>
@@ -156,7 +162,6 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 
 <div id="viagens"></div>
 
-<!-- ⏳ CONTAGEM REGRESSIVA -->
 <div class="extra-box" id="countdownBox">⏳ Carregando contagem...</div>
 
 <canvas id="grafico"></canvas>
@@ -173,11 +178,7 @@ src="https://maps.google.com/maps?q=Gramado%20RS&t=&z=13&ie=UTF8&iwloc=&output=e
 </div>
 
 <script>
-let viagens = JSON.parse(localStorage.getItem("viagens")) || [{
-    destino:"Gramado",
-    gastos:[]
-}];
-
+let viagens = JSON.parse(localStorage.getItem("viagens")) || [{ destino:"Gramado", gastos:[] }];
 let chart;
 
 function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
@@ -194,10 +195,7 @@ function adicionarGasto(){
 }
 
 function togglePago(i){ viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago; salvar(); renderizar(); }
-function toggleCategoria(id){
-    const el=document.getElementById(id);
-    el.style.display=el.style.display==="none"?"block":"none";
-}
+function toggleCategoria(id){ const el=document.getElementById(id); el.style.display=el.style.display==="none"?"block":"none"; }
 function limparTudo(){ if(confirm("Apagar todos os gastos?")){ viagens[0].gastos=[]; salvar(); renderizar(); } }
 
 function renderizar(){
@@ -266,22 +264,23 @@ setInterval(()=>{
     setTimeout(()=>snow.remove(),5000);
 },200);
 
-/* ⏳ CONTAGEM REGRESSIVA */
+/* ⏳ CONTAGEM */
 const dataViagem = new Date("2027-01-04T00:00:00").getTime();
 const countdownBox = document.getElementById("countdownBox");
-
 function atualizarContagem(){
-    const agora = new Date().getTime();
-    const diff = dataViagem - agora;
-    if(diff<=0){ countdownBox.innerHTML="🎉 A viagem para Gramado chegou!"; return; }
+    const diff = dataViagem - new Date().getTime();
+    if(diff<=0){ countdownBox.innerHTML="🎉 A viagem chegou!"; return; }
     const dias=Math.floor(diff/(1000*60*60*24));
     const horas=Math.floor((diff/(1000*60*60))%24);
     const minutos=Math.floor((diff/1000/60)%60);
     const segundos=Math.floor((diff/1000)%60);
     countdownBox.innerHTML=`⏳ Faltam <strong>${dias}</strong>d <strong>${horas}</strong>h <strong>${minutos}</strong>m <strong>${segundos}</strong>s`;
 }
-setInterval(atualizarContagem,1000);
-atualizarContagem();
+setInterval(atualizarContagem,1000); atualizarContagem();
+
+/* 🎵 MÚSICA */
+const musica=document.getElementById("musicaNatal");
+function toggleMusica(){ musica.paused?musica.play():musica.pause(); }
 
 const categoriaSel=document.getElementById("categoria");
 const nomeItem=document.getElementById("nomeItem");
