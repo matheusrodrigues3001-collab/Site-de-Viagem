@@ -10,51 +10,63 @@ body {
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #0f172a, #1e3a8a);
     margin: 0;
-    padding: 20px;
+    padding: 15px;
     color: white;
+    font-size: 14px;
 }
 
-h1 { text-align: center; }
+h1 { 
+    text-align: center; 
+    font-size: 20px;
+    margin-bottom: 10px;
+}
 
 .container {
-    max-width: 1000px;
+    max-width: 760px;
     margin: auto;
     background: white;
     color: black;
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+h2 {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
 }
 
 input {
-    padding: 8px;
-    width: 100%;
-    margin: 5px 0;
+    padding: 6px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    font-size: 13px;
 }
 
 button {
-    padding: 10px;
-    width: 100%;
+    padding: 8px;
     background: #2563eb;
     color: white;
     font-weight: bold;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 5px;
+    font-size: 13px;
+    margin-top: 6px;
 }
 
 button:hover { background: #1e40af; }
 
 .delete-btn {
     background: #dc2626;
-    padding: 6px 10px;
-    border-radius: 6px;
-    color: white;
-    border: none;
-    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 12px;
 }
 
 .clear-btn {
@@ -63,20 +75,27 @@ button:hover { background: #1e40af; }
 
 table {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 12px;
     border-collapse: collapse;
+    font-size: 13px;
 }
 
 th, td {
-    padding: 8px;
+    padding: 6px;
     border-bottom: 1px solid #ddd;
     text-align: center;
 }
 
 .total {
-    font-size: 18px;
-    margin-top: 10px;
+    font-size: 15px;
+    margin-top: 8px;
     font-weight: bold;
+    text-align: right;
+}
+
+canvas {
+    margin-top: 15px;
+    max-height: 240px;
 }
 </style>
 </head>
@@ -87,12 +106,15 @@ th, td {
 <div class="container">
 
 <h2>Nova Viagem</h2>
+
+<div class="inputs-grid">
 <input type="text" id="local" placeholder="Destino">
-<input type="number" id="passagem" placeholder="Valor Passagem">
-<input type="number" id="hotel" placeholder="Valor Hotel">
-<input type="number" id="alimentacao" placeholder="Valor Alimentação">
-<input type="number" id="passeios" placeholder="Valor Passeios">
-<input type="number" id="transporte" placeholder="Valor Transporte Local">
+<input type="number" id="passagem" placeholder="Passagem">
+<input type="number" id="hotel" placeholder="Hotel">
+<input type="number" id="alimentacao" placeholder="Alimentação">
+<input type="number" id="passeios" placeholder="Passeios">
+<input type="number" id="transporte" placeholder="Transporte">
+</div>
 
 <button onclick="adicionarViagem()">Salvar Viagem</button>
 <button class="clear-btn" onclick="limparTudo()">🧹 Limpar Tudo</button>
