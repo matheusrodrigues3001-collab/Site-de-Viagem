@@ -67,19 +67,8 @@ button{
     font-weight:bold;
 }
 
-.gastos-lista{
-    margin-top:4px;
-    padding-left:8px;
-    display:none;
-}
-
-.gasto{
-    display:flex;
-    justify-content:space-between;
-    font-size:12px;
-    margin:4px 0;
-}
-
+.gastos-lista{display:none;margin-top:4px;padding-left:8px}
+.gasto{display:flex;justify-content:space-between;font-size:12px;margin:4px 0}
 .pago{text-decoration:line-through;color:#16a34a}
 
 .resumo{
@@ -99,13 +88,16 @@ canvas{margin-top:15px}
     <h1>✈️ Minhas Viagens</h1>
 
     <input type="text" id="destino" placeholder="Destino">
-    <select id="categoria">
+
+    <select id="categoria" onchange="verificarOutro()">
         <option>Passagem</option>
         <option>Hotel</option>
         <option>Alimentação</option>
         <option>Passeios</option>
         <option>Transporte</option>
+        <option>Outros</option>
     </select>
+
     <input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
     <input type="number" id="valor" placeholder="Valor R$">
 
@@ -122,11 +114,20 @@ let chart;
 
 function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
 
+function verificarOutro(){
+    if(categoriaInput.value==="Outros"){
+        nomeItem.placeholder="Descreva o que é esse gasto";
+    } else {
+        nomeItem.placeholder="Nome do gasto/passeio";
+    }
+}
+
 function adicionarGasto(){
     const destino = destinoInput.value.trim();
     const categoria = categoriaInput.value;
     const nome = nomeItem.value.trim();
     const valor = parseFloat(valorInput.value);
+
     if(!destino || !nome || !valor) return alert("Preencha tudo!");
 
     let viagem = viagens.find(v => v.destino === destino);
@@ -147,8 +148,8 @@ function togglePago(v,g){
 }
 
 function toggleCategoria(id){
-    const el = document.getElementById(id);
-    el.style.display = el.style.display === "none" ? "block" : "none";
+    const el=document.getElementById(id);
+    el.style.display=el.style.display==="none"?"block":"none";
 }
 
 function limparTudo(){
@@ -218,8 +219,7 @@ function atualizarGrafico(dados){
     if(chart) chart.destroy();
     chart=new Chart(ctx,{
         type:'doughnut',
-        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] },
-        options:{ plugins:{legend:{position:'bottom'}} }
+        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] }
     });
 }
 
