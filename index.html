@@ -25,6 +25,7 @@ body{
     box-shadow:0 15px 40px rgba(0,0,0,0.25);
 }
 h1{text-align:center;color:#1e3a8a;font-size:22px}
+
 input,select{
     width:100%;
     padding:8px;
@@ -33,6 +34,7 @@ input,select{
     border:1px solid #cbd5e1;
     font-size:13px;
 }
+
 button{
     width:100%;
     padding:8px;
@@ -44,19 +46,42 @@ button{
 }
 .primary{background:#2563eb;color:white}
 .danger{background:#ef4444;color:white}
+
 .viagem{
     background:#f1f5f9;
     margin-top:12px;
     padding:10px;
     border-radius:14px;
 }
+
+.categoria-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#e2e8f0;
+    padding:6px 8px;
+    border-radius:8px;
+    margin-top:6px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.gastos-lista{
+    margin-top:4px;
+    padding-left:8px;
+    display:none;
+}
+
 .gasto{
     display:flex;
     justify-content:space-between;
     font-size:12px;
     margin:4px 0;
 }
+
 .pago{text-decoration:line-through;color:#16a34a}
+
 .resumo{
     margin-top:6px;
     background:white;
@@ -64,6 +89,7 @@ button{
     border-radius:8px;
     font-size:12px;
 }
+
 canvas{margin-top:15px}
 </style>
 </head>
@@ -73,7 +99,6 @@ canvas{margin-top:15px}
     <h1>✈️ Minhas Viagens</h1>
 
     <input type="text" id="destino" placeholder="Destino">
-
     <select id="categoria">
         <option>Passagem</option>
         <option>Hotel</option>
@@ -81,8 +106,7 @@ canvas{margin-top:15px}
         <option>Passeios</option>
         <option>Transporte</option>
     </select>
-
-    <input type="text" id="nomeItem" placeholder="Nome do passeio ou gasto">
+    <input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
     <input type="number" id="valor" placeholder="Valor R$">
 
     <button class="primary" onclick="adicionarGasto()">Adicionar</button>
@@ -103,7 +127,6 @@ function adicionarGasto(){
     const categoria = categoriaInput.value;
     const nome = nomeItem.value.trim();
     const valor = parseFloat(valorInput.value);
-
     if(!destino || !nome || !valor) return alert("Preencha tudo!");
 
     let viagem = viagens.find(v => v.destino === destino);
@@ -123,6 +146,11 @@ function togglePago(v,g){
     renderizar();
 }
 
+function toggleCategoria(id){
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === "none" ? "block" : "none";
+}
+
 function limparTudo(){
     if(confirm("Apagar tudo?")){
         viagens=[];
@@ -139,7 +167,6 @@ function renderizar(){
         let total=0,pago=0;
         let html=`<div class="viagem"><strong>${v.destino}</strong>`;
 
-        // AGRUPA POR CATEGORIA
         const grupos={};
         v.gastos.forEach((g,i)=>{
             if(!grupos[g.categoria]) grupos[g.categoria]=[];
@@ -150,7 +177,13 @@ function renderizar(){
         });
 
         for(const cat in grupos){
-            html+=`<h4>${cat}</h4>`;
+            const id=`cat-${vIndex}-${cat}`;
+            html+=`
+            <div class="categoria-header" onclick="toggleCategoria('${id}')">
+                <span>${cat}</span><span>▶</span>
+            </div>
+            <div class="gastos-lista" id="${id}">`;
+
             grupos[cat].forEach(obj=>{
                 html+=`
                 <div class="gasto ${obj.g.pago?"pago":""}">
@@ -162,10 +195,11 @@ function renderizar(){
                     <span>R$${obj.g.valor.toFixed(2)}</span>
                 </div>`;
             });
+
+            html+=`</div>`;
         }
 
         let falta=total-pago;
-
         html+=`
         <div class="resumo">
         Total: R$${total.toFixed(2)}<br>
@@ -184,7 +218,8 @@ function atualizarGrafico(dados){
     if(chart) chart.destroy();
     chart=new Chart(ctx,{
         type:'doughnut',
-        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] }
+        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] },
+        options:{ plugins:{legend:{position:'bottom'}} }
     });
 }
 
