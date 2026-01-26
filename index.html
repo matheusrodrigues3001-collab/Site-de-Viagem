@@ -118,6 +118,14 @@ button{
   font-size:13px;
 }
 
+.credito{
+  text-align:center;
+  margin-top:18px;
+  font-size:12px;
+  color:#475569;
+  opacity:0.8;
+}
+
 iframe{width:100%;border-radius:12px;margin-top:6px}
 canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 </style>
@@ -158,6 +166,8 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 🗺️ Mapa de Gramado
 <iframe height="200" src="https://maps.google.com/maps?q=Gramado%20RS&output=embed"></iframe>
 </div>
+
+<div class="credito">Criado por <strong>Matheus Damica</strong> ✨</div>
 </div>
 
 <script>
@@ -217,8 +227,7 @@ function renderizar(){
     <div class="categoria-header" onclick="toggleCategoria('${id}')">
       <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span>
     </div>
-    <div class="gastos-lista" id="${id}">
-    `;
+    <div class="gastos-lista" id="${id}">`;
     grupos[cat].forEach(obj=>{
       html+=`
       <div class="gasto ${obj.g.pago?"pago":""}">
@@ -250,12 +259,10 @@ function atualizarGrafico(dados){
   chart=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(dados),datasets:[{data:Object.values(dados)}]}});
 }
 
-/* CLIMA REAL */
 fetch("https://api.open-meteo.com/v1/forecast?latitude=-29.37&longitude=-50.88&current_weather=true")
 .then(r=>r.json())
 .then(d=>climaBox.innerHTML=`🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h`);
 
-/* NEVE */
 setInterval(()=>{
   const snow=document.createElement("div");
   snow.className="snowflake";
@@ -267,14 +274,13 @@ setInterval(()=>{
   setTimeout(()=>snow.remove(),5000);
 },200);
 
-/* CONTAGEM REGRESSIVA */
 const dataViagem = new Date("2027-01-04T00:00:00").getTime();
 function atualizarContagem(){
   const agora = new Date().getTime();
   const diff = dataViagem - agora;
   if(diff<=0){ countdownBox.innerHTML="🎉 A viagem chegou!"; return;}
   const dias=Math.floor(diff/(1000*60*60*24));
-  const horas=Math.floor((diff/(1000*60*60))%24);
+  const horas=Math.floor((diff/1000/60/60)%24);
   const minutos=Math.floor((diff/1000/60)%60);
   const segundos=Math.floor((diff/1000)%60);
   countdownBox.innerHTML=`⏳ Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
