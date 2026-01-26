@@ -15,26 +15,17 @@ body{
     display:flex;
     justify-content:center;
     padding:20px;
-    color:#1e293b;
 }
-
 .container{
-    background:#ffffff;
+    background:#fff;
     width:100%;
     max-width:520px;
     border-radius:18px;
     padding:18px;
     box-shadow:0 15px 40px rgba(0,0,0,0.25);
 }
-
-h1{
-    text-align:center;
-    font-size:22px;
-    margin-bottom:15px;
-    color:#1e3a8a;
-}
-
-input, select{
+h1{text-align:center;color:#1e3a8a;font-size:22px}
+input,select{
     width:100%;
     padding:8px;
     margin:5px 0;
@@ -42,7 +33,6 @@ input, select{
     border:1px solid #cbd5e1;
     font-size:13px;
 }
-
 button{
     width:100%;
     padding:8px;
@@ -51,59 +41,30 @@ button{
     border-radius:10px;
     font-weight:bold;
     cursor:pointer;
-    transition:.2s;
-    font-size:13px;
 }
-
 .primary{background:#2563eb;color:white}
-.primary:hover{background:#1d4ed8}
-
 .danger{background:#ef4444;color:white}
-.danger:hover{background:#dc2626}
-
 .viagem{
     background:#f1f5f9;
     margin-top:12px;
     padding:10px;
     border-radius:14px;
-    box-shadow:0 5px 10px rgba(0,0,0,0.05);
 }
-
-.viagem strong{
-    font-size:15px;
-    color:#0f172a;
-}
-
-.gasto-item{
+.gasto{
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    margin:4px 0;
     font-size:12px;
+    margin:4px 0;
 }
-
-.gasto-item input{
-    transform:scale(1.1);
-    margin-right:6px;
-}
-
-.pago{
-    text-decoration:line-through;
-    color:#16a34a;
-}
-
+.pago{text-decoration:line-through;color:#16a34a}
 .resumo{
     margin-top:6px;
     background:white;
     padding:6px;
     border-radius:8px;
     font-size:12px;
-    border-left:4px solid #2563eb;
 }
-
-canvas{
-    margin-top:15px;
-}
+canvas{margin-top:15px}
 </style>
 </head>
 <body>
@@ -111,7 +72,7 @@ canvas{
 <div class="container">
     <h1>✈️ Minhas Viagens</h1>
 
-    <input type="text" id="destino" placeholder="Destino da viagem">
+    <input type="text" id="destino" placeholder="Destino">
 
     <select id="categoria">
         <option>Passagem</option>
@@ -119,12 +80,12 @@ canvas{
         <option>Alimentação</option>
         <option>Passeios</option>
         <option>Transporte</option>
-        <option>Outros</option>
     </select>
 
+    <input type="text" id="nomeItem" placeholder="Nome do passeio ou gasto">
     <input type="number" id="valor" placeholder="Valor R$">
 
-    <button class="primary" onclick="adicionarGasto()">Adicionar Gasto</button>
+    <button class="primary" onclick="adicionarGasto()">Adicionar</button>
     <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
     <div id="viagens"></div>
@@ -135,15 +96,15 @@ canvas{
 let viagens = JSON.parse(localStorage.getItem("viagens")) || [];
 let chart;
 
-function salvar(){
-    localStorage.setItem("viagens", JSON.stringify(viagens));
-}
+function salvar(){ localStorage.setItem("viagens", JSON.stringify(viagens)); }
 
 function adicionarGasto(){
-    const destino = destinoInput.value;
+    const destino = destinoInput.value.trim();
     const categoria = categoriaInput.value;
+    const nome = nomeItem.value.trim();
     const valor = parseFloat(valorInput.value);
-    if(!destino || !valor) return alert("Preencha os campos!");
+
+    if(!destino || !nome || !valor) return alert("Preencha tudo!");
 
     let viagem = viagens.find(v => v.destino === destino);
     if(!viagem){
@@ -151,25 +112,19 @@ function adicionarGasto(){
         viagens.push(viagem);
     }
 
-    viagem.gastos.push({ categoria, valor, pago:false });
+    viagem.gastos.push({ categoria, nome, valor, pago:false });
     salvar();
     renderizar();
 }
 
-function togglePago(vIndex, gIndex){
-    viagens[vIndex].gastos[gIndex].pago = !viagens[vIndex].gastos[gIndex].pago;
-    salvar();
-    renderizar();
-}
-
-function excluirViagem(index){
-    viagens.splice(index,1);
+function togglePago(v,g){
+    viagens[v].gastos[g].pago = !viagens[v].gastos[g].pago;
     salvar();
     renderizar();
 }
 
 function limparTudo(){
-    if(confirm("Apagar todas as viagens?")){
+    if(confirm("Apagar tudo?")){
         viagens=[];
         salvar();
         renderizar();
@@ -181,41 +136,44 @@ function renderizar(){
     let categoriasTotais={};
 
     viagens.forEach((v,vIndex)=>{
-        let total=0, pago=0;
-        let div=document.createElement("div");
-        div.className="viagem";
+        let total=0,pago=0;
+        let html=`<div class="viagem"><strong>${v.destino}</strong>`;
 
-        let html=`<strong>${v.destino}</strong>`;
-
-        v.gastos.forEach((g,gIndex)=>{
+        // AGRUPA POR CATEGORIA
+        const grupos={};
+        v.gastos.forEach((g,i)=>{
+            if(!grupos[g.categoria]) grupos[g.categoria]=[];
+            grupos[g.categoria].push({g,i});
             total+=g.valor;
             if(g.pago) pago+=g.valor;
             categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
-
-            html+=`
-            <div class="gasto-item ${g.pago?"pago":""}">
-                <span>
-                    <input type="checkbox" ${g.pago?"checked":""}
-                    onclick="togglePago(${vIndex},${gIndex})">
-                    ${g.categoria} - R$${g.valor.toFixed(2)}
-                </span>
-            </div>`;
         });
+
+        for(const cat in grupos){
+            html+=`<h4>${cat}</h4>`;
+            grupos[cat].forEach(obj=>{
+                html+=`
+                <div class="gasto ${obj.g.pago?"pago":""}">
+                    <span>
+                        <input type="checkbox" ${obj.g.pago?"checked":""}
+                        onclick="togglePago(${vIndex},${obj.i})">
+                        ${obj.g.nome}
+                    </span>
+                    <span>R$${obj.g.valor.toFixed(2)}</span>
+                </div>`;
+            });
+        }
 
         let falta=total-pago;
 
         html+=`
         <div class="resumo">
-            Total: <b>R$${total.toFixed(2)}</b><br>
-            Pago: <b style="color:#16a34a">R$${pago.toFixed(2)}</b><br>
-            Falta: <b style="color:#dc2626">R$${falta.toFixed(2)}</b>
-        </div>
+        Total: R$${total.toFixed(2)}<br>
+        Pago: <span style="color:#16a34a">R$${pago.toFixed(2)}</span><br>
+        Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span>
+        </div></div>`;
 
-        <button class="danger" onclick="excluirViagem(${vIndex})">Excluir Viagem</button>
-        `;
-
-        div.innerHTML=html;
-        viagensDiv.appendChild(div);
+        viagensDiv.innerHTML+=html;
     });
 
     atualizarGrafico(categoriasTotais);
@@ -224,21 +182,15 @@ function renderizar(){
 function atualizarGrafico(dados){
     const ctx=document.getElementById('grafico');
     if(chart) chart.destroy();
-
     chart=new Chart(ctx,{
         type:'doughnut',
-        data:{
-            labels:Object.keys(dados),
-            datasets:[{ data:Object.values(dados) }]
-        },
-        options:{
-            plugins:{ legend:{ position:'bottom' } }
-        }
+        data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] }
     });
 }
 
 const destinoInput=document.getElementById("destino");
 const categoriaInput=document.getElementById("categoria");
+const nomeItem=document.getElementById("nomeItem");
 const valorInput=document.getElementById("valor");
 const viagensDiv=document.getElementById("viagens");
 
