@@ -96,6 +96,11 @@ canvas{margin-top:15px}
         width="100%" height="180" style="border:0"></iframe>
     </div>
 
+    <!-- 🌦️ CLIMA -->
+    <div id="climaBox" style="margin-top:10px;background:#e0f2fe;padding:8px;border-radius:10px;font-size:12px;color:#0c4a6e">
+        🌤️ Carregando clima de Gramado...
+    </div>
+
     <select id="categoria" onchange="verificarOutro()">
         <option>Passagem</option>
         <option>Hotel</option>
@@ -135,18 +140,14 @@ function adicionarGasto(){
     const categoria = categoriaInput.value;
     const nome = nomeItem.value.trim();
     const valor = parseFloat(valorInput.value);
-
     if(!nome || !valor) return alert("Preencha tudo!");
-
     viagens[0].gastos.push({ categoria, nome, valor, pago:false });
-    salvar();
-    renderizar();
+    salvar(); renderizar();
 }
 
 function togglePago(g){
     viagens[0].gastos[g].pago = !viagens[0].gastos[g].pago;
-    salvar();
-    renderizar();
+    salvar(); renderizar();
 }
 
 function toggleCategoria(id){
@@ -156,9 +157,7 @@ function toggleCategoria(id){
 
 function limparTudo(){
     if(confirm("Apagar todos os gastos?")){
-        viagens[0].gastos=[];
-        salvar();
-        renderizar();
+        viagens[0].gastos=[]; salvar(); renderizar();
     }
 }
 
@@ -166,7 +165,6 @@ function renderizar(){
     viagensDiv.innerHTML="";
     let total=0,pago=0,categoriasTotais={};
     let v=viagens[0];
-
     let html=`<div class="viagem"><strong>${v.destino}</strong>`;
     const grupos={};
 
@@ -227,26 +225,37 @@ function atualizarGrafico(dados){
 
 /* ⏳ CONTADOR */
 const dataViagem = new Date("2027-01-04T00:00:00");
-
 function atualizarContador(){
     const agora = new Date();
     const diff = dataViagem - agora;
-
-    if(diff <= 0){
-        contador.innerText = "A viagem começou! ✈️";
-        return;
-    }
-
-    const dias = Math.floor(diff/(1000*60*60*24));
-    const horas = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-    const minutos = Math.floor((diff%(1000*60*60))/(1000*60));
-    const segundos = Math.floor((diff%(1000*60))/1000);
-
-    contador.innerText = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s para Gramado`;
+    if(diff <= 0){ contador.innerText="A viagem começou! ✈️"; return; }
+    const dias=Math.floor(diff/(1000*60*60*24));
+    const horas=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+    const minutos=Math.floor((diff%(1000*60*60))/(1000*60));
+    const segundos=Math.floor((diff%(1000*60))/1000);
+    contador.innerText=`Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s para Gramado`;
 }
-
 setInterval(atualizarContador,1000);
 atualizarContador();
+
+/* 🌦️ CLIMA */
+async function carregarClima(){
+    try{
+        const lat=-29.374, lon=-50.876;
+        const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data=await res.json();
+        const temp=data.current_weather.temperature;
+        const vento=data.current_weather.windspeed;
+        const codigo=data.current_weather.weathercode;
+        climaBox.innerHTML=`🌡️ <strong>${temp}°C</strong> | 💨 Vento ${vento} km/h <br> ☁️ ${traduzirTempo(codigo)} em Gramado agora`;
+    }catch{ climaBox.innerText="Não foi possível carregar o clima."; }
+}
+function traduzirTempo(code){
+    const mapa={0:"Céu limpo ☀️",1:"Principalmente limpo 🌤️",2:"Parcialmente nublado ⛅",3:"Nublado ☁️",61:"Chuva leve 🌧️",63:"Chuva moderada 🌧️",80:"Pancadas de chuva 🌦️",95:"Tempestade ⛈️"};
+    return mapa[code]||"Clima variado";
+}
+carregarClima();
+setInterval(carregarClima,600000);
 
 const categoriaInput=document.getElementById("categoria");
 const nomeItem=document.getElementById("nomeItem");
