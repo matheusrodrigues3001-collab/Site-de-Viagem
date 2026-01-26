@@ -1,259 +1,172 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Planejamento de Viagem - Gramado</title>
-
+<meta charset="UTF-8">
+<title>Planejamento de Viagem</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+:root {
+    --primary:#1e40af;
+    --bg:#f1f5f9;
+}
 body{
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg,#dbeafe,#f0f9ff);
-    margin:0;
-    padding:20px;
+    font-family:Segoe UI, sans-serif;
+    background:var(--bg);
     display:flex;
     justify-content:center;
+    padding:20px;
 }
-.container{
+.box{
     background:white;
     width:100%;
-    max-width:820px;
-    border-radius:14px;
-    padding:18px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.1);
+    max-width:520px;
+    padding:16px;
+    border-radius:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
 h1{
     text-align:center;
+    font-size:18px;
     margin:0;
-    font-size:22px;
-}
-.subtitle{
-    text-align:center;
-    color:#555;
-    margin-bottom:10px;
 }
 .countdown{
     text-align:center;
-    font-weight:bold;
-    background:#eff6ff;
-    padding:8px;
-    border-radius:8px;
-    margin-bottom:15px;
+    background:#e0f2fe;
+    padding:6px;
+    border-radius:6px;
+    font-size:13px;
+    margin:8px 0 12px 0;
 }
-
-.section{
-    margin-bottom:12px;
-    background:#f8fafc;
-    padding:10px;
-    border-radius:10px;
-}
-.section h2{
-    font-size:15px;
-    margin:0 0 8px 0;
+.row{
+    display:grid;
+    grid-template-columns:1fr 80px 50px;
+    gap:6px;
+    margin-bottom:6px;
 }
 input{
     padding:6px;
+    font-size:12px;
     border-radius:6px;
     border:1px solid #cbd5e1;
-    font-size:13px;
 }
 button{
     padding:6px 10px;
+    font-size:12px;
     border:none;
     border-radius:6px;
     cursor:pointer;
-    font-size:12px;
 }
-.btn-primary{ background:#2563eb;color:white;}
-.btn-danger{ background:#dc2626;color:white;}
-.btn-secondary{ background:#64748b;color:white;}
-
-.grid{
-    display:grid;
-    grid-template-columns:1fr 90px 60px;
-    gap:6px;
-    margin-bottom:6px;
-    align-items:center;
-}
-
+.primary{background:var(--primary);color:white;}
+.danger{background:#dc2626;color:white;}
 .summary{
     display:flex;
     justify-content:space-between;
     font-weight:bold;
-    margin-top:10px;
-    font-size:14px;
+    font-size:13px;
+    margin-top:8px;
 }
-canvas{ margin-top:15px;}
-.toggle{
-    cursor:pointer;
-    font-size:12px;
-    color:#2563eb;
-}
+canvas{margin-top:10px;}
 </style>
 </head>
 
 <body>
-<div class="container">
-    <h1>✈️ Viagem para Gramado</h1>
-    <div class="subtitle">Data da viagem: <b>04/01/2027</b></div>
-    <div class="countdown" id="countdown"></div>
+<div class="box">
+    <h1>✈️ Viagem Gramado</h1>
+    <div class="countdown" id="contador"></div>
 
-    <div class="section">
-        <h2>💰 Custos Gerais</h2>
-
-        <div class="grid">
-            <input placeholder="Passagem" id="passagem">
-            <input type="number" placeholder="R$" id="v_passagem">
-            <input type="checkbox" id="p_passagem">
-        </div>
-
-        <div class="grid">
-            <input placeholder="Hotel" id="hotel">
-            <input type="number" placeholder="R$" id="v_hotel">
-            <input type="checkbox" id="p_hotel">
-        </div>
-
-        <div class="grid">
-            <input placeholder="Alimentação" id="alimentacao">
-            <input type="number" placeholder="R$" id="v_alimentacao">
-            <input type="checkbox" id="p_alimentacao">
-        </div>
-
-        <div class="grid">
-            <input placeholder="Transporte" id="transporte">
-            <input type="number" placeholder="R$" id="v_transporte">
-            <input type="checkbox" id="p_transporte">
-        </div>
-
-        <div class="grid">
-            <input placeholder="Outros (descrever)" id="outros_nome">
-            <input type="number" placeholder="R$" id="v_outros">
-            <input type="checkbox" id="p_outros">
-        </div>
+    <div class="row">
+        <input placeholder="Passagem">
+        <input type="number" placeholder="R$" id="passagem">
+        <input type="checkbox" id="p_passagem">
     </div>
 
-    <div class="section">
-        <h2>🎢 Passeios <span class="toggle" onclick="togglePasseios()">[expandir]</span></h2>
-        <div id="areaPasseios" style="display:none"></div>
-        <button class="btn-primary" onclick="addPasseio()">+ Adicionar passeio</button>
+    <div class="row">
+        <input placeholder="Hotel">
+        <input type="number" placeholder="R$" id="hotel">
+        <input type="checkbox" id="p_hotel">
+    </div>
+
+    <div class="row">
+        <input placeholder="Passeios">
+        <input type="number" placeholder="R$" id="passeio">
+        <input type="checkbox" id="p_passeio">
+    </div>
+
+    <div class="row">
+        <input placeholder="Outros">
+        <input type="number" placeholder="R$" id="outros">
+        <input type="checkbox" id="p_outros">
     </div>
 
     <div class="summary">
         <span>Total: R$ <span id="total">0</span></span>
         <span>Pago: R$ <span id="pago">0</span></span>
-        <span>Falta: R$ <span id="falta">0</span></span>
     </div>
 
     <canvas id="grafico"></canvas>
 
-    <div style="margin-top:12px; text-align:right;">
-        <button class="btn-secondary" onclick="limpar()">Limpar</button>
-        <button class="btn-danger" onclick="excluir()">Excluir viagem</button>
+    <div style="text-align:right;margin-top:10px;">
+        <button class="danger" onclick="limpar()">Limpar</button>
     </div>
 </div>
 
 <script>
-const viagemData = new Date("2027-01-04");
-
+/* 📅 CONTADOR DA VIAGEM */
+const dataViagem = new Date("2027-01-04");
 function atualizarContador(){
     const hoje = new Date();
-    const diff = viagemData - hoje;
+    const diff = dataViagem - hoje;
     const dias = Math.ceil(diff/(1000*60*60*24));
-    document.getElementById("countdown").innerText =
-        dias>0 ? `Faltam ${dias} dias para a viagem!` : "A viagem chegou!";
+    document.getElementById("contador").innerText =
+        dias>0 ? `Faltam ${dias} dias para Gramado!` : "A viagem chegou!";
 }
+setInterval(atualizarContador,1000);
 atualizarContador();
 
-function togglePasseios(){
-    const area = document.getElementById("areaPasseios");
-    area.style.display = area.style.display==="none"?"block":"none";
-}
-
-function addPasseio(nome="",valor="",pago=false){
-    const area = document.getElementById("areaPasseios");
-    const div = document.createElement("div");
-    div.className="grid";
-    div.innerHTML=`
-        <input placeholder="Nome do passeio" value="${nome}">
-        <input type="number" placeholder="R$" value="${valor}">
-        <input type="checkbox" ${pago?"checked":""}>
-    `;
-    area.appendChild(div);
-}
-
-function pegarValor(id){ return parseFloat(document.getElementById(id).value)||0 }
-function pegarPago(id){ return document.getElementById(id).checked }
+/* 💰 CÁLCULO */
+function v(id){ return parseFloat(document.getElementById(id).value)||0 }
+function p(id){ return document.getElementById(id).checked }
 
 function calcular(){
-    let total=0,pago=0;
-
-    const campos=[
-        ["v_passagem","p_passagem"],
-        ["v_hotel","p_hotel"],
-        ["v_alimentacao","p_alimentacao"],
-        ["v_transporte","p_transporte"],
-        ["v_outros","p_outros"]
+    const valores=[
+        ["passagem","p_passagem"],
+        ["hotel","p_hotel"],
+        ["passeio","p_passeio"],
+        ["outros","p_outros"]
     ];
 
-    campos.forEach(c=>{
-        const v=pegarValor(c[0]);
-        total+=v;
-        if(pegarPago(c[1])) pago+=v;
-    });
-
-    document.querySelectorAll("#areaPasseios .grid").forEach(p=>{
-        const v=parseFloat(p.children[1].value)||0;
-        total+=v;
-        if(p.children[2].checked) pago+=v;
+    let total=0, pago=0;
+    valores.forEach(c=>{
+        const val=v(c[0]);
+        total+=val;
+        if(p(c[1])) pago+=val;
     });
 
     document.getElementById("total").innerText=total.toFixed(2);
     document.getElementById("pago").innerText=pago.toFixed(2);
-    document.getElementById("falta").innerText=(total-pago).toFixed(2);
-
     atualizarGrafico();
-    salvar();
 }
+setInterval(calcular,800);
 
-setInterval(calcular,1000);
-
-function salvar(){
-    localStorage.setItem("viagemGramado", document.querySelector(".container").innerHTML);
-}
-
-function limpar(){
-    if(confirm("Limpar campos?")){
-        location.reload();
-    }
-}
-
-function excluir(){
-    if(confirm("Excluir viagem salva?")){
-        localStorage.removeItem("viagemGramado");
-        location.reload();
-    }
-}
-
+/* 📊 GRÁFICO */
 let chart;
 function atualizarGrafico(){
-    const data=[
-        pegarValor("v_passagem"),
-        pegarValor("v_hotel"),
-        pegarValor("v_alimentacao"),
-        pegarValor("v_transporte"),
-        pegarValor("v_outros")
-    ];
     const ctx=document.getElementById("grafico");
     if(chart) chart.destroy();
     chart=new Chart(ctx,{
-        type:'doughnut',
+        type:'pie',
         data:{
-            labels:["Passagem","Hotel","Alimentação","Transporte","Outros"],
-            datasets:[{data:data}]
+            labels:["Passagem","Hotel","Passeios","Outros"],
+            datasets:[{
+                data:[v("passagem"),v("hotel"),v("passeio"),v("outros")]
+            }]
         }
     });
+}
+
+function limpar(){
+    location.reload();
 }
 </script>
 </body>
