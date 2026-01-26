@@ -87,6 +87,15 @@ canvas{margin-top:15px}
 <div class="container">
     <h1>❄️ Viagem para Gramado</h1>
 
+    <!-- ⏳ CONTADOR -->
+    <div id="contador" style="text-align:center;font-size:13px;margin-bottom:8px;color:#1e3a8a;font-weight:bold"></div>
+
+    <!-- 🗺️ MAPA -->
+    <div style="margin-top:10px;border-radius:12px;overflow:hidden">
+        <iframe src="https://www.google.com/maps?q=Gramado+RS&output=embed"
+        width="100%" height="180" style="border:0"></iframe>
+    </div>
+
     <select id="categoria" onchange="verificarOutro()">
         <option>Passagem</option>
         <option>Hotel</option>
@@ -193,11 +202,14 @@ function renderizar(){
     }
 
     let falta=total-pago;
+    let porcentagem = total>0 ? ((pago/total)*100).toFixed(1) : 0;
+
     html+=`
     <div class="resumo">
     Total: R$${total.toFixed(2)}<br>
     Pago: <span style="color:#16a34a">R$${pago.toFixed(2)}</span><br>
-    Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span>
+    Falta: <span style="color:#dc2626">R$${falta.toFixed(2)}</span><br>
+    Progresso Pago: <strong>${porcentagem}%</strong>
     </div></div>`;
 
     viagensDiv.innerHTML=html;
@@ -212,6 +224,29 @@ function atualizarGrafico(dados){
         data:{ labels:Object.keys(dados), datasets:[{data:Object.values(dados)}] }
     });
 }
+
+/* ⏳ CONTADOR */
+const dataViagem = new Date("2027-01-04T00:00:00");
+
+function atualizarContador(){
+    const agora = new Date();
+    const diff = dataViagem - agora;
+
+    if(diff <= 0){
+        contador.innerText = "A viagem começou! ✈️";
+        return;
+    }
+
+    const dias = Math.floor(diff/(1000*60*60*24));
+    const horas = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+    const minutos = Math.floor((diff%(1000*60*60))/(1000*60));
+    const segundos = Math.floor((diff%(1000*60))/1000);
+
+    contador.innerText = `Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s para Gramado`;
+}
+
+setInterval(atualizarContador,1000);
+atualizarContador();
 
 const categoriaInput=document.getElementById("categoria");
 const nomeItem=document.getElementById("nomeItem");
