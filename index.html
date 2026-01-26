@@ -103,7 +103,7 @@ th, td {
 <th>Destino</th>
 <th>Total</th>
 <th>Checklist</th>
-<th>Excluir</th>
+<th>Ações</th>
 </tr>
 </thead>
 <tbody id="tabela"></tbody>
@@ -117,6 +117,7 @@ th, td {
 
 <script>
 let viagens = JSON.parse(localStorage.getItem("viagens")) || [];
+let editandoIndex = null;
 
 function salvar() {
     localStorage.setItem("viagens", JSON.stringify(viagens));
@@ -134,10 +135,31 @@ function adicionarViagem() {
     };
 
     viagem.total = viagem.passagem + viagem.hotel + viagem.alimentacao + viagem.passeios + viagem.transporte;
-    viagens.push(viagem);
+
+    if (editandoIndex !== null) {
+        viagem.pago = viagens[editandoIndex].pago;
+        viagens[editandoIndex] = viagem;
+        editandoIndex = null;
+    } else {
+        viagens.push(viagem);
+    }
+
     salvar();
     atualizarTela();
     document.querySelectorAll("input").forEach(i=>i.value="");
+}
+
+function editarViagem(i) {
+    const v = viagens[i];
+    local.value = v.local;
+    passagem.value = v.passagem;
+    hotel.value = v.hotel;
+    alimentacao.value = v.alimentacao;
+    passeios.value = v.passeios;
+    transporte.value = v.transporte;
+
+    editandoIndex = i;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function excluirViagem(i) {
@@ -180,7 +202,10 @@ function atualizarTela() {
             <td>${v.local}</td>
             <td>R$ ${v.total.toFixed(2)}</td>
             <td>${checklist}</td>
-            <td><button class="delete-btn" onclick="excluirViagem(${i})">X</button></td>
+            <td>
+                <button onclick="editarViagem(${i})">✏️</button>
+                <button class="delete-btn" onclick="excluirViagem(${i})">X</button>
+            </td>
         </tr>`;
     });
 
@@ -219,4 +244,3 @@ atualizarTela();
 
 </body>
 </html>
-
