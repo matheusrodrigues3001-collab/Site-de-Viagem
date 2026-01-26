@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Viagem para Gramado</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 *{box-sizing:border-box}
 body{
@@ -25,7 +24,6 @@ body{
   opacity:0.9;
 }
 @keyframes fall{to{transform:translateY(110vh)}}
-
 .container{
   backdrop-filter: blur(14px);
   background:rgba(255,255,255,0.75);
@@ -35,9 +33,7 @@ body{
   padding:22px;
   box-shadow:0 25px 50px rgba(0,0,0,0.15);
 }
-
 h1{text-align:center;color:#1e3a8a;margin-bottom:10px}
-
 input,select{
   width:100%;
   padding:10px;
@@ -46,7 +42,6 @@ input,select{
   border:1px solid #c7d2fe;
   font-size:13px;
 }
-
 button{
   width:100%;
   padding:10px;
@@ -58,7 +53,6 @@ button{
 }
 .primary{background:#3b82f6;color:white}
 .danger{background:#64748b;color:white}
-
 .viagem{
   background:white;
   margin-top:15px;
@@ -66,7 +60,6 @@ button{
   border-radius:16px;
   border:1px solid #dbeafe;
 }
-
 .categoria-header{
   display:flex;
   justify-content:space-between;
@@ -79,7 +72,6 @@ button{
   font-size:13px;
   font-weight:bold;
 }
-
 .gastos-lista{
   display:none;
   margin-top:6px;
@@ -87,7 +79,6 @@ button{
   background:#f0f9ff;
   border-radius:10px;
 }
-
 .gasto{
   display:flex;
   justify-content:space-between;
@@ -96,9 +87,7 @@ button{
   padding:4px 0;
   border-bottom:1px dashed #cfe8ff;
 }
-
 .pago{text-decoration:line-through;color:#16a34a;font-weight:bold}
-
 .resumo{
   margin-top:10px;
   background:#f0f9ff;
@@ -108,7 +97,6 @@ button{
   border:1px solid #bae6fd;
   line-height:1.6;
 }
-
 .extra-box{
   margin-top:12px;
   background:white;
@@ -117,7 +105,6 @@ button{
   border:1px solid #dbeafe;
   font-size:13px;
 }
-
 .credito{
   text-align:center;
   margin-top:18px;
@@ -125,18 +112,13 @@ button{
   color:#475569;
   opacity:0.8;
 }
-
 iframe{width:100%;border-radius:12px;margin-top:6px}
 canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 </style>
 </head>
 <body>
-
 <div class="container">
 <h1>❄️ Viagem para Gramado</h1>
-
-<!-- BOTÃO MÚSICA -->
-<button class="primary" onclick="toggleMusica()" id="musicBtn">🔊 Música ON</button>
 
 <select id="categoria">
 <option>Passagem</option>
@@ -149,7 +131,6 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 
 <input type="text" id="nomeItem" placeholder="Nome do gasto/passeio">
 <input type="number" id="valor" placeholder="Valor R$">
-
 <select id="pagamento">
 <option value="cartao">💳 Cartão</option>
 <option value="dinheiro">💵 Dinheiro</option>
@@ -159,8 +140,10 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <button class="danger" onclick="limparTudo()">Limpar Tudo</button>
 
 <div id="viagens"></div>
+
 <div class="extra-box" id="countdownBox">⏳ Carregando contagem...</div>
 <canvas id="grafico"></canvas>
+
 <div class="extra-box" id="climaBox">🌡️ Carregando clima...</div>
 
 <div class="extra-box">
@@ -171,29 +154,7 @@ canvas{margin-top:18px;background:white;padding:8px;border-radius:12px}
 <div class="credito">Criado por <strong>Matheus Damica</strong> ✨</div>
 </div>
 
-<!-- 🎵 ÁUDIO -->
-<audio id="musicaFundo" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_0c4c4e6c9b.mp3?filename=christmas-piano-ambient-126197.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-const musica=document.getElementById("musicaFundo");
-const musicBtn=document.getElementById("musicBtn");
-let tocando=false;
-
-function toggleMusica(){
-  if(!tocando){
-    musica.volume=0.4;
-    musica.play();
-    musicBtn.innerHTML="🔇 Música OFF";
-    tocando=true;
-  }else{
-    musica.pause();
-    musicBtn.innerHTML="🔊 Música ON";
-    tocando=false;
-  }
-}
-
 let viagens = JSON.parse(localStorage.getItem("viagens")) || [{ destino:"Gramado", gastos:[] }];
 let chart;
 
@@ -206,18 +167,32 @@ function adicionarGasto(){
   const pagamentoTipo = pagamentoSel.value;
   if(!nome || !valor) return alert("Preencha tudo!");
   viagens[0].gastos.push({categoria,nome,valor,pago:false,pagamento:pagamentoTipo});
-  salvar(); renderizar();
-  nomeItem.value=""; valorInput.value="";
+  salvar();
+  renderizar();
+  nomeItem.value="";
+  valorInput.value="";
 }
 
-function togglePago(i){ viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago; salvar(); renderizar(); }
-function toggleCategoria(id){ const el=document.getElementById(id); el.style.display=el.style.display==="none"?"block":"none"; }
-function limparTudo(){ if(confirm("Apagar todos os gastos?")){ viagens[0].gastos=[]; salvar(); renderizar(); } }
+function togglePago(i){
+  viagens[0].gastos[i].pago=!viagens[0].gastos[i].pago;
+  salvar(); renderizar();
+}
+
+function toggleCategoria(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==="none"?"block":"none";
+}
+
+function limparTudo(){
+  if(confirm("Apagar todos os gastos?")){
+    viagens[0].gastos=[];
+    salvar(); renderizar();
+  }
+}
 
 function renderizar(){
   viagensDiv.innerHTML="";
   let total=0,pago=0,cartao=0,dinheiro=0,categoriasTotais={},grupos={};
-
   viagens[0].gastos.forEach((g,i)=>{
     if(!grupos[g.categoria]) grupos[g.categoria]=[];
     grupos[g.categoria].push({g,i});
@@ -227,19 +202,33 @@ function renderizar(){
     categoriasTotais[g.categoria]=(categoriasTotais[g.categoria]||0)+g.valor;
   });
 
-  let html=`<div class="viagem"><strong>Gramado</strong>`;
+  let html=<div class="viagem"><strong>Gramado</strong>;
   for(const cat in grupos){
-    const id=`cat-${cat}`;
+    const id=cat-${cat};
     const totalCat=grupos[cat].reduce((s,o)=>s+o.g.valor,0);
-    html+=`<div class="categoria-header" onclick="toggleCategoria('${id}')"><span>${cat}</span><span>R$${totalCat.toFixed(2)}</span></div><div class="gastos-lista" id="${id}">`;
+    html+= <div class="categoria-header" onclick="toggleCategoria('${id}')">
+      <span>${cat}</span><span>R$${totalCat.toFixed(2)}</span>
+    </div>
+    <div class="gastos-lista" id="${id}">;
     grupos[cat].forEach(obj=>{
-      html+=`<div class="gasto ${obj.g.pago?"pago":""}"><span><input type="checkbox" ${obj.g.pago?"checked":""} onclick="togglePago(${obj.i})"> ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})</span><span>R$${obj.g.valor.toFixed(2)}</span></div>`;
+      html+= <div class="gasto ${obj.g.pago?"pago":""}">
+        <span><input type="checkbox" ${obj.g.pago?"checked":""} onclick="togglePago(${obj.i})">
+        ${obj.g.nome} (${obj.g.pagamento==="cartao"?"💳 Cartão":"💵 Dinheiro"})</span>
+        <span>R$${obj.g.valor.toFixed(2)}</span>
+      </div>;
     });
-    html+=`</div>`;
+    html+=</div>;
   }
 
   let falta=total-pago;
-  html+=`<div class="resumo">Total: R$${total.toFixed(2)}<br>Pago: R$${pago.toFixed(2)}<br>Falta: R$${falta.toFixed(2)}<br>💳 Cartão: R$${cartao.toFixed(2)}<br>💵 Dinheiro: R$${dinheiro.toFixed(2)}</div></div>`;
+  html+= <div class="resumo">
+    Total: R$${total.toFixed(2)}<br>
+    Pago: R$${pago.toFixed(2)}<br>
+    Falta: R$${falta.toFixed(2)}<br>
+    💳 Cartão: R$${cartao.toFixed(2)}<br>
+    💵 Dinheiro: R$${dinheiro.toFixed(2)}
+  </div></div>;
+
   viagensDiv.innerHTML=html;
   atualizarGrafico(categoriasTotais);
 }
@@ -252,7 +241,7 @@ function atualizarGrafico(dados){
 
 fetch("https://api.open-meteo.com/v1/forecast?latitude=-29.37&longitude=-50.88&current_weather=true")
 .then(r=>r.json())
-.then(d=>climaBox.innerHTML=`🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h`);
+.then(d=>climaBox.innerHTML=🌡️ ${d.current_weather.temperature}°C • Vento ${d.current_weather.windspeed} km/h);
 
 setInterval(()=>{
   const snow=document.createElement("div");
@@ -274,7 +263,7 @@ function atualizarContagem(){
   const horas=Math.floor((diff/1000/60/60)%24);
   const minutos=Math.floor((diff/1000/60)%60);
   const segundos=Math.floor((diff/1000)%60);
-  countdownBox.innerHTML=`⏳ Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+  countdownBox.innerHTML=⏳ Faltam ${dias}d ${horas}h ${minutos}m ${segundos}s;
 }
 setInterval(atualizarContagem,1000);
 
